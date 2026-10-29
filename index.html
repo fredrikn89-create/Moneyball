@@ -8,7 +8,7 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
    let r; if(window.__csv[id]) r={status:'ok',data:parse(window.__csv[id])};
    else if(this._calc[id]){ try{ r={status:'ok',data:this._calc[id].fn(...this._calc[id].inputs.map(i=>this.data(i).data))}; }catch(e){ console.error('CALCERR '+id+' '+e.stack); r={status:'error',data:[]}; } }
    else r={status:'missing',data:[]}; this._cache[id]=r; return r; },
- draw(n,f){this._draw[n]=f;}, onData(f){this._on.push(f);}, setLink(){}, setParams(){}, params(){return {};}, resetParams(){}, refresh(){}};
+ draw(n,f){ if(f){this._draw[n]=f; return;} const g=this._draw[n]; if(!g) return; document.querySelectorAll('[data-draw="'+n+'"]').forEach(el=>{ try{ (typeof g==='function'?g:g.mount)(el);}catch(e){console.error('DRAWERR '+n+' '+e.stack);} }); }, onData(f){this._on.push(f);}, setLink(){}, setParams(){}, params(){return {};}, resetParams(){}, refresh(){}};
 </script><meta name="dash-one-writer">
 <style>
   #dash-root { --dash-gutter: 0; }
