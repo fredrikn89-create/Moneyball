@@ -1,0 +1,73 @@
+lag,gw,maaned,poeng,hits,netto,bytter,gw_rank,chip,gw_snitt,gw_hoyest,lagnavn
+Morten,1,Aug,48,0,48,0,4969905,,50,131,Sleivdal
+Morten,2,Aug,93,0,93,0,2578047,,81,161,Sleivdal
+Morten,3,Sep,57,0,57,0,3062890,Triple Captain,51,119,Sleivdal
+Morten,4,Sep,70,0,70,0,5005656,Wildcard,69,151,Sleivdal
+Morten,5,Sep,43,0,43,2,7250536,,48,126,Sleivdal
+Morten,6,Okt,61,4,57,3,4828849,,58,131,Sleivdal
+Morten,7,Okt,54,4,50,2,7490741,,59,122,Sleivdal
+Morten,8,Okt,48,4,44,2,4587165,,45,120,Sleivdal
+Hakki,1,Aug,55,0,55,0,2935786,,50,131,LykkeBambus
+Hakki,2,Aug,71,0,71,0,6797938,,81,161,LykkeBambus
+Hakki,3,Sep,71,0,71,0,389904,,51,119,LykkeBambus
+Hakki,4,Sep,72,0,72,3,4694216,Triple Captain,69,151,LykkeBambus
+Hakki,5,Sep,40,0,40,0,8007201,,48,126,LykkeBambus
+Hakki,6,Okt,61,0,61,2,4796782,,58,131,LykkeBambus
+Hakki,7,Okt,73,0,73,1,1676084,,59,122,LykkeBambus
+Hakki,8,Okt,34,4,30,2,9446170,,45,120,LykkeBambus
+Marius,1,Aug,40,0,40,0,7094525,,50,131,Post it!
+Marius,2,Aug,107,0,107,0,845481,,81,161,Post it!
+Marius,3,Sep,63,0,63,2,1605033,Triple Captain,51,119,Post it!
+Marius,4,Sep,55,0,55,0,8741547,,69,151,Post it!
+Marius,5,Sep,39,0,39,0,8327520,,48,126,Post it!
+Marius,6,Okt,56,0,56,2,6304310,,58,131,Post it!
+Marius,7,Okt,65,0,65,0,3791356,,59,122,Post it!
+Marius,8,Okt,53,0,53,1,2861576,Bench Boost,45,120,Post it!
+Cedric,1,Aug,66,0,66,0,893716,Bench Boost,50,131,cedric's Team
+Cedric,2,Aug,108,0,108,0,743106,,81,161,cedric's Team
+Cedric,3,Sep,41,0,41,2,8864508,,51,119,cedric's Team
+Cedric,4,Sep,69,0,69,1,5444218,,69,151,cedric's Team
+Cedric,5,Sep,36,0,36,0,9176671,Wildcard,48,126,cedric's Team
+Cedric,6,Okt,74,0,74,0,1388630,,58,131,cedric's Team
+Cedric,7,Okt,65,0,65,2,4052855,,59,122,cedric's Team
+Cedric,8,Okt,33,0,33,0,9484278,,45,120,cedric's Team
+Næss,1,Aug,75,0,75,0,238376,Bench Boost,50,131,Jeremy Jakke
+Næss,2,Aug,104,0,104,0,1145127,,81,161,Jeremy Jakke
+Næss,3,Sep,60,0,60,2,2357972,Triple Captain,51,119,Jeremy Jakke
+Næss,4,Sep,91,0,91,0,736002,,69,151,Jeremy Jakke
+Næss,5,Sep,33,0,33,2,9986315,,48,126,Jeremy Jakke
+Næss,6,Okt,45,0,45,0,8959211,,58,131,Jeremy Jakke
+Næss,7,Okt,71,0,71,2,2209711,,59,122,Jeremy Jakke
+Næss,8,Okt,31,4,27,2,10080514,,45,120,Jeremy Jakke
+Waag,1,Aug,63,0,63,0,1282719,Bench Boost,50,131,Jaisslemania
+Waag,2,Aug,87,0,87,1,3664606,,81,161,Jaisslemania
+Waag,3,Sep,56,4,52,2,3654321,Triple Captain,51,119,Jaisslemania
+Waag,4,Sep,92,0,92,1,686235,,69,151,Jaisslemania
+Waag,5,Sep,57,4,53,2,2437044,,48,126,Jaisslemania
+Waag,6,Okt,50,0,50,0,7768249,,58,131,Jaisslemania
+Waag,7,Okt,69,0,69,0,2550245,,59,122,Jaisslemania
+Waag,8,Okt,53,0,53,0,2681088,Wildcard,45,120,Jaisslemania
+Eirik,1,Aug,88,0,88,0,21140,Bench Boost,50,131,Six7even
+Eirik,2,Aug,94,0,94,0,2427967,,81,161,Six7even
+Eirik,3,Sep,58,0,58,2,2968128,,51,119,Six7even
+Eirik,4,Sep,76,0,76,0,3355927,Wildcard,69,151,Six7even
+Eirik,5,Sep,45,0,45,0,6224706,,48,126,Six7even
+Eirik,6,Okt,85,0,85,2,291257,,58,131,Six7even
+Eirik,7,Okt,63,0,63,1,4663573,,59,122,Six7even
+Eirik,8,Okt,47,4,43,2,4958266,,45,120,Six7even
+Bauge,1,Aug,60,0,60,0,1785496,Bench Boost,50,131,Saka Potatoes
+Bauge,2,Aug,128,0,128,0,42497,,81,161,Saka Potatoes
+Bauge,3,Sep,58,0,58,2,2968128,Triple Captain,51,119,Saka Potatoes
+Bauge,4,Sep,94,4,90,2,536169,,69,151,Saka Potatoes
+Bauge,5,Sep,44,0,44,1,6801754,,48,126,Saka Potatoes
+Bauge,6,Okt,79,0,79,0,712130,,58,131,Saka Potatoes
+Bauge,7,Okt,66,0,66,2,3717083,,59,122,Saka Potatoes
+Bauge,8,Okt,40,0,40,0,7296796,,45,120,Saka Potatoes
+Henrik,1,Aug,77,0,77,0,170961,Bench Boost,50,131,van Henche
+Henrik,2,Aug,111,0,111,0,512876,,81,161,van Henche
+Henrik,3,Sep,44,0,44,0,7837184,Wildcard,51,119,van Henche
+Henrik,4,Sep,107,0,107,1,45474,,69,151,van Henche
+Henrik,5,Sep,42,0,42,2,7600235,,48,126,van Henche
+Henrik,6,Okt,87,0,87,0,168450,,58,131,van Henche
+Henrik,7,Okt,89,0,89,2,117590,Triple Captain,59,122,van Henche
+Henrik,8,Okt,50,0,50,0,3603135,,45,120,van Henche
