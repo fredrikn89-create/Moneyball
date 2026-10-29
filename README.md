@@ -7,3 +7,5 @@ Dashboard for en privat FPL-liga med ni deltakere: tabell, rundeoppsummeringer, 
 - `src/` har kildeteksten fra Artifact-versjonen og oppsummeringstekstene.
 
 Vis siden: Settings → Pages → Deploy from a branch → `main` / root.
+
+Live: https://fredrikn89-create.github.io/Moneyball/
