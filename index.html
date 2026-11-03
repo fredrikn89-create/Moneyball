@@ -30,6 +30,7 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
   .fp-seglabel { width: 3.6rem; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); text-transform: uppercase; letter-spacing: .08em; }
   .fp-seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 2px; border-radius: 999px; background: rgba(70, 55, 35, .08); }
   .fp-segbtn { font: inherit; font-size: var(--cds-font-size-caption); padding: 4px 12px; border: 0; border-radius: 999px; background: transparent; color: var(--color-fg-muted); cursor: pointer; }
+  .fp-segbtn:disabled { opacity: .4; cursor: not-allowed; }
   .fp-segbtn:focus-visible { outline: 2px solid var(--fp-ink); outline-offset: 1px; }
   .fp-segbtn[aria-pressed="true"] { background: var(--fp-ink); color: #f4eee3; font-weight: 600; }
   .fp-mtable th.fp-mth { text-align: left; font-size: var(--cds-font-size-body); color: var(--color-fg); }
@@ -398,8 +399,14 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
           <div class="fp-segrow"><span class="fp-seglabel">Samlet</span>
             <div class="fp-seg" role="group" aria-label="Samlet">
               <button type="button" class="fp-segbtn" data-periode="Alle" aria-pressed="true">Totalt</button>
-              <button type="button" class="fp-segbtn" data-periode="AugSep" aria-pressed="false">Aug–sep</button>
-              <button type="button" class="fp-segbtn" data-periode="Aug" aria-pressed="false">Aug</button>
+            </div>
+          </div>
+          <div class="fp-segrow"><span class="fp-seglabel">Kvartal</span>
+            <div class="fp-seg" role="group" aria-label="Kvartal">
+              <button type="button" class="fp-segbtn" data-periode="K1" aria-pressed="false">1. kvartal (aug–sep)</button>
+              <button type="button" class="fp-segbtn" data-periode="K2" aria-pressed="false">2. kvartal (okt–des)</button>
+              <button type="button" class="fp-segbtn" data-periode="K3" aria-pressed="false" disabled title="Ingen runder spilt ennå">3. kvartal (jan–mar)</button>
+              <button type="button" class="fp-segbtn" data-periode="K4" aria-pressed="false" disabled title="Ingen runder spilt ennå">4. kvartal (apr–mai)</button>
             </div>
           </div>
           <div class="fp-segrow"><span class="fp-seglabel">Måned</span>
@@ -410,7 +417,7 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
             </div>
           </div>
         </div>
-        <p class="fp-note">Netto = GW-poeng minus hits. Samlet: totalt = GW1–9, aug–sep = GW1–5, aug = GW1–2. Måned: aug = GW1–2, sep = GW3–5, okt = GW6–9.</p>
+        <p class="fp-note">Netto = GW-poeng minus hits. Kvartal: 1 = aug–sep, 2 = okt–des, 3 = jan–mar, 4 = apr–mai. Månedene følger FPLs måneder: aug = GW1–2, sep = GW3–5, okt = GW6–9.</p>
         <div class="fp-scroll">
           <table class="fp-table" data-source="tabell_p" data-row-key="periode,lag">
             <thead><tr>
@@ -564,13 +571,14 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
 
   dash.calc('tabell_p', {
     title: 'Tabell per periode',
-    description: 'Netto, hits, bytter og snitt per lag for hele sesongen og per måned (Aug = GW1–2, Sep = GW3–5, Okt = GW6–9), rangert på netto.',
+    description: 'Netto, hits, bytter og snitt per lag for hele sesongen, per kvartal og per måned (Aug = GW1–2, Sep = GW3–5, Okt = GW6–9), rangert på netto.',
     inputs: ['gameweeks'],
     fn: (gameweeks) => {
       const out = [];
-      for (const per of ['Alle', 'AugSep', 'Aug', 'Sep', 'Okt']) {
+      const kv = {K1: ['Aug', 'Sep'], K2: ['Okt', 'Nov', 'Des'], K3: ['Jan', 'Feb', 'Mar'], K4: ['Apr', 'Mai']};
+      for (const per of ['Alle', 'K1', 'K2', 'K3', 'K4', 'Aug', 'Sep', 'Okt']) {
         const teams = {};
-        for (const r of gameweeks.filter((x) => per === 'Alle' || (per === 'AugSep' ? x.maaned !== 'Okt' : x.maaned === per))) {
+        for (const r of gameweeks.filter((x) => per === 'Alle' || (kv[per] ? kv[per].includes(x.maaned) : x.maaned === per))) {
           const t = teams[r.lag] || (teams[r.lag] = {lag: r.lag, lagnavn: r.lagnavn, poeng: 0, hits: 0, netto: 0, bytter: 0, beste_gw: 0, n: 0});
           t.poeng += Number(r.poeng); t.hits += Number(r.hits); t.netto += Number(r.netto);
           t.bytter += Number(r.bytter); t.beste_gw = Math.max(t.beste_gw, Number(r.poeng)); t.n += 1;
