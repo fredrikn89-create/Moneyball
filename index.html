@@ -444,6 +444,13 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
         <p class="fp-lop-info" data-draw="lop-info" data-source="lop"></p>
         <div class="fp-chart" data-draw="lop-chart" data-source="lop"></div>
       </div>
+      <div class="fp-card">
+        <div class="fp-card-head">
+          <h3 class="fp-card-title">Avstand til lederen</h3>
+        </div>
+        <p class="fp-note">Poeng bak lederen etter hver runde. Jo nærmere toppen, jo tettere på. Trykk på et lagnavn i grafen over for å fremheve ett lag.</p>
+        <div class="fp-chart" data-draw="avstand-chart" data-source="avstand"></div>
+      </div>
     </div>
   </section>
 
@@ -641,6 +648,28 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
           sum[l] = (sum[l] || 0) + (r ? Number(r.netto) : 0);
         }
         for (const l of lag) out.push({lag: l, lagnavn: navn[l], gw: g, total: sum[l], plass: 1 + lag.filter((o) => sum[o] > sum[l]).length});
+      }
+      return out;
+    }
+  });
+
+  dash.calc('avstand', {
+    title: 'Avstand til lederen',
+    description: 'Poeng bak lederen (netto) per lag etter hver runde.',
+    inputs: ['gameweeks'],
+    fn: (gameweeks) => {
+      const gws = [...new Set(gameweeks.map((r) => Number(r.gw)))].sort((a, b) => a - b);
+      const lag = [...new Set(gameweeks.map((r) => r.lag))];
+      const navn = Object.fromEntries(gameweeks.map((r) => [r.lag, r.lagnavn]));
+      const sum = {};
+      const out = [];
+      for (const g of gws) {
+        for (const l of lag) {
+          const r = gameweeks.find((x) => x.lag === l && Number(x.gw) === g);
+          sum[l] = (sum[l] || 0) + (r ? Number(r.netto) : 0);
+        }
+        const top = Math.max(...lag.map((l) => sum[l]));
+        for (const l of lag) out.push({lag: l, lagnavn: navn[l], gw: g, bak: top - sum[l]});
       }
       return out;
     }
@@ -881,7 +910,7 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
     fpSel = t === fpSel ? null : t;
     fpResetBtn.hidden = !fpSel;
     document.getElementById('lop-note').hidden = !!fpSel;
-    dash.draw('lop-chart'); dash.draw('lop-info');
+    dash.draw('lop-chart'); dash.draw('lop-info'); dash.draw('avstand-chart');
   };
   fpResetBtn.addEventListener('click', () => fpSelect(fpSel));
 
@@ -960,6 +989,47 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
       .append('tspan').attr('dx', 6).attr('font-size', 11).attr('font-weight', 400).attr('fill', 'var(--color-fg-muted)').text((t) => (withTeam ? navnAv[t] : ''));
     labels.on('pointerenter', function () { d3.select(this).select('rect').attr('fill', 'color-mix(in srgb, var(--fp-ink) 8%, transparent)'); })
       .on('pointerleave', function (e, t) { d3.select(this).select('rect').attr('fill', fpSel === t ? 'color-mix(in srgb, var(--fp-ink) 10%, transparent)' : 'transparent'); });
+  });
+  dash.draw('avstand-chart', (el) => {
+    const d = dash.data('avstand');
+    el.replaceChildren();
+    if (d.status !== 'ok' || !d.data.length) return;
+    const rows = d.data;
+    const gws = [...new Set(rows.map((r) => r.gw))].sort((a, b) => a - b);
+    const last = gws[gws.length - 1];
+    const fin = Object.fromEntries(rows.filter((r) => r.gw === last).map((r) => [r.lag, r.bak]));
+    const teams = Object.keys(fin).sort((a, b) => fin[a] - fin[b]);
+    const W = Math.max(280, el.clientWidth), H = 340;
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).style('display', 'block');
+    const m = {t: 14, r: Math.min(150, W * 0.36), b: 28, l: 34};
+    const maxV = Math.max(10, d3.max(rows, (r) => r.bak));
+    const x = d3.scalePoint(gws, [m.l, W - m.r]);
+    const y = d3.scaleLinear([0, maxV], [m.t, H - m.b]).nice();
+    const g = svg.append('g');
+    const palette = ['var(--fp-s1)', 'var(--fp-s2)', 'var(--fp-s3)'];
+    const rank = Object.fromEntries(teams.map((t, i) => [t, i + 1]));
+    const colorOf = (t) => (fpSel === t ? 'var(--fp-ink)' : rank[t] <= 3 && !fpSel ? palette[rank[t] - 1] : 'var(--cds-chart-muted)');
+    g.selectAll('line.h').data(y.ticks(5)).join('line').attr('x1', m.l - 4).attr('x2', W - m.r).attr('y1', (v) => y(v)).attr('y2', (v) => y(v)).attr('stroke', 'var(--cds-chart-grid)');
+    g.selectAll('text.tick').data(y.ticks(5)).join('text').attr('x', m.l - 10).attr('y', (v) => y(v)).attr('dy', '0.32em').attr('text-anchor', 'end').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text((v) => v);
+    g.selectAll('text.gw').data(gws).join('text').attr('x', (v) => x(v)).attr('y', H - 8).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text((v) => v);
+    const line = d3.line().x((r) => x(r.gw)).y((r) => y(r.bak));
+    const ordered = teams.slice().reverse();
+    for (const t of ordered) {
+      const pts = rows.filter((r) => r.lag === t).sort((a, b) => a.gw - b.gw);
+      const hi = fpSel === t || (!fpSel && rank[t] <= 3);
+      g.append('path').attr('d', line(pts)).attr('fill', 'none').attr('stroke', colorOf(t)).attr('stroke-width', hi ? 2.25 : 1.5).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round').attr('opacity', fpSel && fpSel !== t ? 0.35 : 1);
+      g.append('circle').attr('cx', x(last)).attr('cy', y(fin[t])).attr('r', 3.5).attr('fill', colorOf(t));
+    }
+    // labels at right, spread so they do not overlap
+    const ys = teams.map((t) => y(fin[t]));
+    for (let i = 1; i < ys.length; i++) ys[i] = Math.max(ys[i], ys[i - 1] + 14);
+    const over = ys[ys.length - 1] - (H - m.b + 6);
+    if (over > 0) for (let i = ys.length - 1; i >= 0; i--) { ys[i] -= over; if (i < ys.length - 1) ys[i] = Math.min(ys[i], ys[i + 1] - 14); }
+    teams.forEach((t, i) => {
+      g.append('text').attr('x', W - m.r + 10).attr('y', ys[i]).attr('dy', '0.32em').attr('font-size', 12)
+        .attr('fill', fpSel && fpSel !== t ? 'var(--color-fg-muted)' : 'var(--color-fg)').style('font-weight', fpSel === t || (!fpSel && rank[t] <= 3) ? 600 : 400)
+        .text(`${t}  ${fin[t] === 0 ? 'leder' : '−' + fin[t]}`);
+    });
   });
 
 })();}catch(e){console.error("SCRIPTERR "+e.stack)}</script>
