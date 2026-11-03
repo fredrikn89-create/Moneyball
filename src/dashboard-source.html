@@ -185,6 +185,7 @@
   .fp-month-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--cds-gap-sm); }
   .fp-month-gw { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .fp-chart { position: relative; min-height: 340px; }
+  .fp-video { display: block; width: 100%; max-width: 420px; margin: 8px auto; border-radius: 12px; background: #0b1220; aspect-ratio: 9 / 16; }
   .fp-gw-list { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 2px 16px; font-size: var(--cds-font-size-caption); }
   .fp-gw-list li { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--cds-chart-grid); padding: 3px 0; }
   .fp-reset { border: 1px solid var(--color-border-line); background: transparent; }
@@ -441,6 +442,14 @@
         </div>
         <p class="fp-note">Poeng bak lederen etter hver runde. Trykk på et lagnavn for å fremheve laget med rød laser. De andre ligger igjen. Trykk på et rundetall for å se hvordan det lå an etter den runden. Trykk igjen for å gå tilbake.</p>
         <div class="fp-chart" data-draw="avstand-chart" data-source="avstand"></div>
+      </div>
+      <div class="fp-card">
+        <div class="fp-card-head">
+          <h3 class="fp-card-title">Stolpediagram-video</h3>
+        </div>
+        <p class="fp-note">Hele sesongen så langt, runde for runde.</p>
+        <video class="fp-video" controls playsinline preload="none" src="https://fredrikn89-create.github.io/Moneyball/media/stolpediagram-race.mp4"></video>
+        <p class="fp-note"><a href="https://fredrikn89-create.github.io/Moneyball/media/stolpediagram-race.mp4" target="_blank" rel="noopener">Åpne videoen i egen fane</a></p>
       </div>
     </div>
   </section>
