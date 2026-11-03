@@ -437,7 +437,7 @@
         <div class="fp-card-head">
           <h3 class="fp-card-title">Avstand til lederen</h3>
         </div>
-        <p class="fp-note">Poeng bak lederen etter hver runde. Jo nærmere toppen, jo tettere på. Trykk på et lagnavn i grafen over for å fremheve ett lag.</p>
+        <p class="fp-note">Poeng bak lederen etter hver runde. Trykk på et lagnavn for å fremheve laget med rød laser. De andre ligger igjen.</p>
         <div class="fp-chart" data-draw="avstand-chart" data-source="avstand"></div>
       </div>
     </div>
@@ -898,7 +898,7 @@
     fpSel = t === fpSel ? null : t;
     fpResetBtn.hidden = !fpSel;
     document.getElementById('lop-note').hidden = !!fpSel;
-    dash.draw('lop-chart'); dash.draw('lop-info'); dash.draw('avstand-chart');
+    dash.draw('lop-chart'); dash.draw('lop-info');
   };
   fpResetBtn.addEventListener('click', () => fpSelect(fpSel));
 
@@ -978,6 +978,7 @@
     labels.on('pointerenter', function () { d3.select(this).select('rect').attr('fill', 'color-mix(in srgb, var(--fp-ink) 8%, transparent)'); })
       .on('pointerleave', function (e, t) { d3.select(this).select('rect').attr('fill', fpSel === t ? 'color-mix(in srgb, var(--fp-ink) 10%, transparent)' : 'transparent'); });
   });
+  window.fpHi = null;
   dash.draw('avstand-chart', (el) => {
     const d = dash.data('avstand');
     el.replaceChildren();
@@ -996,16 +997,22 @@
     const g = svg.append('g');
     const palette = ['var(--fp-s1)', 'var(--fp-s2)', 'var(--fp-s3)'];
     const rank = Object.fromEntries(teams.map((t, i) => [t, i + 1]));
-    const colorOf = (t) => (fpSel === t ? 'var(--fp-ink)' : rank[t] <= 3 && !fpSel ? palette[rank[t] - 1] : 'var(--cds-chart-muted)');
+    const RED = '#ff1f3d';
+    const colorOf = (t) => (window.fpHi === t ? RED : rank[t] <= 3 ? palette[rank[t] - 1] : 'var(--cds-chart-muted)');
+    const defs = svg.append('defs');
+    const flt = defs.append('filter').attr('id', 'fp-laser').attr('x', '-20%').attr('y', '-20%').attr('width', '140%').attr('height', '140%');
+    flt.append('feGaussianBlur').attr('in', 'SourceGraphic').attr('stdDeviation', 3.5).attr('result', 'b');
+    flt.append('feMerge').selectAll('feMergeNode').data(['b', 'b', 'SourceGraphic']).join('feMergeNode').attr('in', (v) => v);
     g.selectAll('line.h').data(y.ticks(5)).join('line').attr('x1', m.l - 4).attr('x2', W - m.r).attr('y1', (v) => y(v)).attr('y2', (v) => y(v)).attr('stroke', 'var(--cds-chart-grid)');
     g.selectAll('text.tick').data(y.ticks(5)).join('text').attr('x', m.l - 10).attr('y', (v) => y(v)).attr('dy', '0.32em').attr('text-anchor', 'end').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text((v) => v);
     g.selectAll('text.gw').data(gws).join('text').attr('x', (v) => x(v)).attr('y', H - 8).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text((v) => v);
     const line = d3.line().x((r) => x(r.gw)).y((r) => y(r.bak));
-    const ordered = teams.slice().reverse();
+    const ordered = teams.slice().reverse().filter((t) => t !== window.fpHi).concat(window.fpHi ? [window.fpHi] : []);
     for (const t of ordered) {
       const pts = rows.filter((r) => r.lag === t).sort((a, b) => a.gw - b.gw);
-      const hi = fpSel === t || (!fpSel && rank[t] <= 3);
-      g.append('path').attr('d', line(pts)).attr('fill', 'none').attr('stroke', colorOf(t)).attr('stroke-width', hi ? 2.25 : 1.5).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round').attr('opacity', fpSel && fpSel !== t ? 0.35 : 1);
+      const hi = window.fpHi === t || rank[t] <= 3; const sel = window.fpHi === t;
+      g.append('path').attr('d', line(pts)).attr('fill', 'none').attr('stroke', colorOf(t)).attr('stroke-width', sel ? 2.5 : hi ? 2.25 : 1.5).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round').attr('filter', sel ? 'url(#fp-laser)' : null);
+      if (sel) g.append('path').attr('d', line(pts)).attr('fill', 'none').attr('stroke', '#ffd6dc').attr('stroke-width', 1).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
       g.append('circle').attr('cx', x(last)).attr('cy', y(fin[t])).attr('r', 3.5).attr('fill', colorOf(t));
     }
     // labels at right, spread so they do not overlap
@@ -1015,7 +1022,9 @@
     if (over > 0) for (let i = ys.length - 1; i >= 0; i--) { ys[i] -= over; if (i < ys.length - 1) ys[i] = Math.min(ys[i], ys[i + 1] - 14); }
     teams.forEach((t, i) => {
       g.append('text').attr('x', W - m.r + 10).attr('y', ys[i]).attr('dy', '0.32em').attr('font-size', 12)
-        .attr('fill', fpSel && fpSel !== t ? 'var(--color-fg-muted)' : 'var(--color-fg)').style('font-weight', fpSel === t || (!fpSel && rank[t] <= 3) ? 600 : 400)
+        .attr('fill', window.fpHi === t ? RED : 'var(--color-fg)').style('font-weight', window.fpHi === t || rank[t] <= 3 ? 600 : 400).style('cursor', 'pointer').attr('tabindex', 0).attr('role', 'button').attr('aria-label', 'Fremhev ' + t).attr('aria-pressed', String(window.fpHi === t))
+        .on('click', () => { window.fpHi = window.fpHi === t ? null : t; dash.draw('avstand-chart'); })
+        .on('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.fpHi = window.fpHi === t ? null : t; dash.draw('avstand-chart'); } })
         .text(`${t}  ${fin[t] === 0 ? 'leder' : '−' + fin[t]}`);
     });
   });
