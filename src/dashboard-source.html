@@ -439,7 +439,7 @@
         <div class="fp-card-head">
           <h3 class="fp-card-title">Avstand til lederen</h3>
         </div>
-        <p class="fp-note">Poeng bak lederen etter hver runde. Trykk på et lagnavn for å fremheve laget med rød laser. De andre ligger igjen. Trykk på et rundetall for å se stillingen etter den runden.</p>
+        <p class="fp-note">Poeng bak lederen etter hver runde. Trykk på et lagnavn for å fremheve laget med rød laser. De andre ligger igjen. Trykk på et rundetall for å se hvordan det lå an etter den runden. Trykk igjen for å gå tilbake.</p>
         <div class="fp-chart" data-draw="avstand-chart" data-source="avstand"></div>
       </div>
     </div>
@@ -985,9 +985,10 @@
     const d = dash.data('avstand');
     el.replaceChildren();
     if (d.status !== 'ok' || !d.data.length) return;
-    const rows = d.data;
-    const gws = [...new Set(rows.map((r) => r.gw))].sort((a, b) => a - b);
-    const last = gws[gws.length - 1];
+    const all = d.data;
+    const gws = [...new Set(all.map((r) => r.gw))].sort((a, b) => a - b);
+    const last = window.fpGw || gws[gws.length - 1];
+    const rows = all.filter((r) => r.gw <= last);
     const fin = Object.fromEntries(rows.filter((r) => r.gw === last).map((r) => [r.lag, r.bak]));
     const teams = Object.keys(fin).sort((a, b) => fin[a] - fin[b]);
     const W = Math.max(280, el.clientWidth), H = 340;
@@ -1028,27 +1029,12 @@
     const over = ys[ys.length - 1] - (H - m.b + 6);
     if (over > 0) for (let i = ys.length - 1; i >= 0; i--) { ys[i] -= over; if (i < ys.length - 1) ys[i] = Math.min(ys[i], ys[i + 1] - 14); }
     teams.forEach((t, i) => {
-      g.append('text').attr('x', W - m.r + 10).attr('y', ys[i]).attr('dy', '0.32em').attr('font-size', 12)
+      g.append('text').attr('x', x(last) + 10).attr('y', ys[i]).attr('dy', '0.32em').attr('font-size', 12)
         .attr('fill', window.fpHi === t ? RED : 'var(--color-fg)').style('font-weight', window.fpHi === t || rank[t] <= 3 ? 600 : 400).style('cursor', 'pointer').attr('tabindex', 0).attr('role', 'button').attr('aria-label', 'Fremhev ' + t).attr('aria-pressed', String(window.fpHi === t))
         .on('click', () => { window.fpHi = window.fpHi === t ? null : t; dash.draw('avstand-chart'); })
         .on('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.fpHi = window.fpHi === t ? null : t; dash.draw('avstand-chart'); } })
         .text(`${t}  ${fin[t] === 0 ? 'leder' : '−' + fin[t]}`);
     });
-    if (window.fpGw) {
-      const at = rows.filter((r) => r.gw === window.fpGw).sort((a, c) => a.bak - c.bak);
-      const box = document.createElement('div'); box.className = 'fp-gw-info';
-      const h = document.createElement('p'); h.className = 'fp-note'; h.textContent = 'Stillingen etter runde ' + window.fpGw + ' (poeng bak lederen):';
-      const ul = document.createElement('ol'); ul.className = 'fp-gw-list';
-      let pl = 0, prev = null;
-      at.forEach((r, i) => {
-        if (r.bak !== prev) pl = i + 1; prev = r.bak;
-        const li = document.createElement('li');
-        const nm = document.createElement('span'); nm.textContent = pl + '. ' + r.lag;
-        const gp = document.createElement('b'); gp.textContent = r.bak === 0 ? 'leder' : '−' + r.bak;
-        li.append(nm, gp); ul.append(li);
-      });
-      box.append(h, ul); el.append(box);
-    }
   });
 </script>
 
