@@ -185,6 +185,8 @@
   .fp-month-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--cds-gap-sm); }
   .fp-month-gw { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .fp-chart { position: relative; min-height: 340px; }
+  .fp-gw-list { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 2px 16px; font-size: var(--cds-font-size-caption); }
+  .fp-gw-list li { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--cds-chart-grid); padding: 3px 0; }
   .fp-reset { border: 1px solid var(--color-border-line); background: transparent; }
   .fp-lop-info { margin: 0; font-size: var(--cds-font-size-body); color: var(--color-fg); }
   .fp-lop-info:empty { display: none; }
@@ -437,7 +439,7 @@
         <div class="fp-card-head">
           <h3 class="fp-card-title">Avstand til lederen</h3>
         </div>
-        <p class="fp-note">Poeng bak lederen etter hver runde. Trykk på et lagnavn for å fremheve laget med rød laser. De andre ligger igjen.</p>
+        <p class="fp-note">Poeng bak lederen etter hver runde. Trykk på et lagnavn for å fremheve laget med rød laser. De andre ligger igjen. Trykk på et rundetall for å se stillingen etter den runden.</p>
         <div class="fp-chart" data-draw="avstand-chart" data-source="avstand"></div>
       </div>
     </div>
@@ -1005,7 +1007,12 @@
     flt.append('feMerge').selectAll('feMergeNode').data(['b', 'b', 'SourceGraphic']).join('feMergeNode').attr('in', (v) => v);
     g.selectAll('line.h').data(y.ticks(5)).join('line').attr('x1', m.l - 4).attr('x2', W - m.r).attr('y1', (v) => y(v)).attr('y2', (v) => y(v)).attr('stroke', 'var(--cds-chart-grid)');
     g.selectAll('text.tick').data(y.ticks(5)).join('text').attr('x', m.l - 10).attr('y', (v) => y(v)).attr('dy', '0.32em').attr('text-anchor', 'end').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text((v) => v);
-    g.selectAll('text.gw').data(gws).join('text').attr('x', (v) => x(v)).attr('y', H - 8).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text((v) => v);
+    if (window.fpGw) g.append('rect').attr('x', x(window.fpGw) - 14).attr('y', m.t - 6).attr('width', 28).attr('height', H - m.b - m.t + 12).attr('rx', 6).attr('fill', 'color-mix(in srgb, var(--fp-ink) 8%, transparent)');
+    const gwSel = (v) => { window.fpGw = window.fpGw === v ? null : v; dash.draw('avstand-chart'); };
+    const gl = g.selectAll('g.gw').data(gws).join('g').attr('class', 'gw').attr('tabindex', 0).attr('role', 'button').attr('aria-label', (v) => 'Vis stillingen etter runde ' + v).attr('aria-pressed', (v) => String(window.fpGw === v)).style('cursor', 'pointer')
+      .on('click', (e, v) => gwSel(v)).on('keydown', (e, v) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); gwSel(v); } });
+    gl.append('rect').attr('x', (v) => x(v) - 16).attr('y', H - 24).attr('width', 32).attr('height', 24).attr('fill', 'transparent');
+    gl.append('text').attr('x', (v) => x(v)).attr('y', H - 8).attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', (v) => (window.fpGw === v ? 'var(--fp-ink)' : 'var(--color-fg-muted)')).style('font-weight', (v) => (window.fpGw === v ? 700 : 400)).text((v) => v);
     const line = d3.line().x((r) => x(r.gw)).y((r) => y(r.bak));
     const ordered = teams.slice().reverse().filter((t) => t !== window.fpHi).concat(window.fpHi ? [window.fpHi] : []);
     for (const t of ordered) {
@@ -1027,6 +1034,21 @@
         .on('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.fpHi = window.fpHi === t ? null : t; dash.draw('avstand-chart'); } })
         .text(`${t}  ${fin[t] === 0 ? 'leder' : '−' + fin[t]}`);
     });
+    if (window.fpGw) {
+      const at = rows.filter((r) => r.gw === window.fpGw).sort((a, c) => a.bak - c.bak);
+      const box = document.createElement('div'); box.className = 'fp-gw-info';
+      const h = document.createElement('p'); h.className = 'fp-note'; h.textContent = 'Stillingen etter runde ' + window.fpGw + ' (poeng bak lederen):';
+      const ul = document.createElement('ol'); ul.className = 'fp-gw-list';
+      let pl = 0, prev = null;
+      at.forEach((r, i) => {
+        if (r.bak !== prev) pl = i + 1; prev = r.bak;
+        const li = document.createElement('li');
+        const nm = document.createElement('span'); nm.textContent = pl + '. ' + r.lag;
+        const gp = document.createElement('b'); gp.textContent = r.bak === 0 ? 'leder' : '−' + r.bak;
+        li.append(nm, gp); ul.append(li);
+      });
+      box.append(h, ul); el.append(box);
+    }
   });
 </script>
 
