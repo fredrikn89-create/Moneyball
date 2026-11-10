@@ -212,12 +212,13 @@
   .fp-pay-tile.na { opacity: .55; }
   .fp-pay-tile .t { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: flex; justify-content: space-between; gap: 6px; }
   .fp-pay-tile .w { font-weight: 600; font-size: var(--cds-font-size-body); }
-  .fp-pay-pl { display: grid; grid-template-columns: 5.5rem 1fr 3.6rem; gap: 8px; align-items: center; padding: 3px 0; font-size: var(--cds-font-size-body); }
+  .fp-pay-pl { display: grid; grid-template-columns: 4.5rem 1fr 5.6rem; gap: 8px; align-items: center; padding: 4px 0; font-size: var(--cds-font-size-body); }
   .fp-pay-pl .bar { display: flex; height: 14px; background: rgba(70,55,35,.06); border-radius: 7px; overflow: hidden; }
   .fp-pay-pl .bar i { display: block; height: 100%; }
   .fp-pay-pl .bar .w { background: var(--fp-s2); }
   .fp-pay-pl .bar .l { background: repeating-linear-gradient(45deg, var(--fp-brass) 0 5px, rgba(140,106,50,.55) 5px 10px); }
-  .fp-pay-pl .v { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .fp-pay-pl .v { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; line-height: 1.2; }
+  .fp-pay-pl .v small { display: block; font-size: 11px; font-weight: 700; color: var(--fp-s2); }
   .fp-panel { display: flex; flex-direction: column; gap: var(--cds-gap-lg); }
   .fp-h2 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-heading); }
 
@@ -1322,7 +1323,9 @@
       const a = mk('i', 'w'); a.style.width = (pl[n].w / mx) * 100 + '%';
       const b = mk('i', 'l'); b.style.width = (pl[n].l / mx) * 100 + '%';
       bar2.append(a, b);
-      r.append(mk('span', '', n), bar2, mk('span', 'v', kr(pl[n].w + pl[n].l)));
+      const v = mk('span', 'v', kr(pl[n].w + pl[n].l));
+      if (pl[n].w > 0) v.append(mk('small', '', kr(pl[n].w) + ' vunnet'));
+      r.append(mk('span', '', n), bar2, v);
       c.append(r);
     }
     el.append(c);
