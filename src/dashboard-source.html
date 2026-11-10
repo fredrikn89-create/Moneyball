@@ -1226,7 +1226,7 @@
         if (tiles) {
           const t = mk('div', 'fp-pay-tile ' + r.status);
           const top = mk('div', 't'); top.append(mk('span', '', r.tittel.replace(/ \(.*$/, '')), mk('span', '', kr(r.belop)));
-          t.append(top, mk('div', 'w', r.status === 'na' ? 'N/A' : r.lag), mk('div', 't', (r.status === 'vunnet' ? '✓ vunnet · ' : r.status === 'leder' ? 'leder · ' : '') + (r.status === 'na' ? 'ikke startet' : r.tekst)));
+          t.append(top, mk('div', 'w', r.status === 'na' ? 'N/A' : r.lag), mk('div', 't', (r.status === 'vunnet' ? '✓ vunnet · ' : r.status === 'leder' ? 'leder · ' : '') + (r.status === 'na' ? 'ikke startet' : r.tekst + (r.lags.length > 1 ? ' · delt: ' + r.lags.map(() => new Intl.NumberFormat('nb-NO').format(r.belop / r.lags.length)).join(' + ') + ' kr' : ''))));
           box.append(t);
         } else {
           const row = mk('div', 'fp-pay-row ' + r.status);
