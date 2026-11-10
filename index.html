@@ -183,6 +183,17 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
   .fp-by-tr .d.pos { color: var(--fp-s2); }
   .fp-by-tr .d.neg { color: var(--color-bad); }
   .fp-by-hitrow { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+
+  .fp-fhe { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--color-border-line); display: flex; flex-direction: column; gap: 10px; }
+  .fp-fhe h4 { margin: 0; font-size: var(--cds-font-size-body); font-weight: 700; }
+  .fp-fhe-row { display: grid; grid-template-columns: 4.6rem 1fr auto; gap: 8px; align-items: center; }
+  .fp-fhe-bars { display: flex; flex-direction: column; gap: 3px; }
+  .fp-fhe-bars div { height: 12px; border-radius: 3px; display: flex; align-items: center; font-size: 10px; color: #fff; padding-left: 6px; font-weight: 700; white-space: nowrap; }
+  .fp-fhe-bars .a { background: var(--fp-s2); }
+  .fp-fhe-bars .b { background: rgba(70,55,35,.45); }
+  .fp-fhe-d { font-family: var(--font-anthropic-serif); font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+  .fp-fhe-d.pos { color: var(--fp-s2); }
+  .fp-fhe-d.neg { color: var(--color-bad); }
   .fp-pay { display: flex; flex-direction: column; gap: var(--cds-gap-lg); }
   .fp-pay-sum { display: flex; flex-direction: column; gap: 10px; }
   .fp-pay-big { display: flex; flex-wrap: wrap; gap: 6px 24px; align-items: baseline; }
@@ -618,6 +629,7 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
             <tbody data-draw="chip-fh" data-source="chipliga"></tbody>
           </table>
         </div>
+        <div class="fp-fhe fp-fh-some" hidden data-draw="fh-effekt" data-source="chipliga"></div>
       </div>
     </div>
   </section>
@@ -1416,6 +1428,36 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
     document.querySelectorAll('#by-seg-w .fp-segbtn').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
     dash.draw('bytter');
   }));
+
+})();}catch(e){console.error("SCRIPTERR "+e.stack)}</script>
+
+<script>try{(function(){
+  window.fpFhData = {runde: 9, lag: {Henrik: {fh: 74, keep: 62}, 'Næss': {fh: 67, keep: 58}}};
+  dash.draw('fh-effekt', (el) => {
+    const d = dash.data('chipliga');
+    el.replaceChildren();
+    if (d.status !== 'ok') return;
+    const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+    const rows = d.data.filter((r) => r.chip === 'Free Hit').map((r) => {
+      const x = window.fpFhData.lag[r.lag];
+      return x ? {lag: r.lag, gw: r.gw, fh: x.fh, keep: x.keep, diff: x.fh - x.keep} : null;
+    }).filter(Boolean).sort((a, b) => b.diff - a.diff);
+    if (!rows.length) return;
+    el.append(mk('h4', '', 'Free Hit-effekt'));
+    el.append(mk('p', 'fp-note', 'Poengene FH-laget ga, mot hva laget fra runden før ville gitt i samme runde (best mulig elleve ut fra de som spilte, kaptein Haaland). Positivt betyr at Free Hit lønte seg.'));
+    const mx = Math.max(...rows.map((r) => Math.max(r.fh, r.keep)));
+    for (const r of rows) {
+      const row = mk('div', 'fp-fhe-row');
+      row.append(mk('div', 'fp-by-name', r.lag));
+      const bars = mk('div', 'fp-fhe-bars');
+      const a = mk('div', 'a', 'FH ' + r.fh); a.style.width = (r.fh / mx) * 100 + '%';
+      const b = mk('div', 'b', 'Beholdt ' + r.keep); b.style.width = (r.keep / mx) * 100 + '%';
+      bars.append(a, b);
+      row.append(bars, mk('div', 'fp-fhe-d ' + (r.diff > 0 ? 'pos' : r.diff < 0 ? 'neg' : ''), (r.diff > 0 ? '+' : r.diff < 0 ? '−' : '') + Math.abs(r.diff)));
+      el.append(row);
+    }
+    el.append(mk('p', 'fp-note', 'Beregnet av laget fra runde 8 med automatiske bytter fra benken for spillere uten poeng. Kapteinen er antatt å være Haaland.'));
+  });
 
 })();}catch(e){console.error("SCRIPTERR "+e.stack)}</script>
 
