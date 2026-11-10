@@ -171,6 +171,7 @@
   .fp-by-tr .d { font-weight: 700; font-variant-numeric: tabular-nums; }
   .fp-by-tr .d.pos { color: var(--fp-s2); }
   .fp-by-tr .d.neg { color: var(--color-bad); }
+  .fp-by-wcpill { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 1px 6px; border-radius: 999px; background: var(--fp-brass); color: #fff; margin-left: 4px; }
   .fp-by-hitrow { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
 
   .fp-fhe { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--color-border-line); display: flex; flex-direction: column; gap: 10px; }
@@ -1373,7 +1374,10 @@
     for (const x of teams) {
       const row = mk('div', 'fp-by-row');
       const head = mk('button', 'fp-by-head'); head.type = 'button'; head.setAttribute('aria-expanded', String(st.open === x.t));
-      const nm = mk('div', 'fp-by-name', x.t); nm.append(mk('small', '', x.its.length + ' bytter'));
+      const nm = mk('div', 'fp-by-name', x.t); const sm = mk('small', '', x.its.length + ' bytter');
+      const wcg = D[x.t].items.filter((i) => i.wc).map((i) => i.g)[0];
+      if (st.w && wcg) { const w = mk('span', 'fp-by-wcpill', 'WC R' + wcg); sm.append(document.createTextNode(' '), w); }
+      nm.append(sm);
       const bar = mk('div', 'fp-by-bar');
       bar.style.setProperty('--z', z + '%');
       const gw = (Math.abs(x.gain) / tot) * 100;
