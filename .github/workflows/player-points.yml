@@ -2,7 +2,7 @@ name: Hent spillerpoeng
 
 on:
   schedule:
-    - cron: "17 3 * * *"      # hver natt (UTC)
+    - cron: "17 5 * * 2"       # hver tirsdag morgen (UTC)
   workflow_dispatch:           # manuell kjøring fra Actions-fanen
 
 permissions:
