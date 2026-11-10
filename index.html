@@ -1138,7 +1138,7 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
 <script>try{(function(){
   dash.calc('payout', {
     title: 'Payout',
-    description: 'Premiene i ligaen: hvem som har vunnet, hvem som leder, og hvilke spill som ikke er startet. Pott 700 kr.',
+    description: 'Premiene i ligaen: hvem som har vunnet, hvem som leder, og hvilke spill som ikke er startet. Pott 6 300 kr (700 kr × 9).',
     inputs: ['gameweeks', 'chips'],
     fn: (gameweeks, chips) => {
       const MN = ['Aug', 'Sep', 'Okt', 'Nov', 'Des', 'Jan', 'Feb', 'Mar', 'Apr', 'Mai'];
@@ -1164,13 +1164,13 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
         gruppe, id, tittel, belop, status, lag: l ? l.lag : '', lags: l ? l.lags : [], lagnavn: l ? l.lagnavn : '', tekst: tekst || ''
       });
       const tot = sums(gameweeks);
-      add('Baseline', 'vinner', 'Vinner (70 % av 60 %)', 210, 'leder', lead(tot, 0), lead(tot, 0).verdi + ' poeng netto');
+      add('Baseline', 'vinner', 'Vinner (70 % av 60 %)', 1890, 'leder', lead(tot, 0), lead(tot, 0).verdi + ' poeng netto');
       const second = tot.filter((x) => x.v < tot[0].v);
-      add('Baseline', 'andre', 'Andreplass (30 % av 60 %)', 90, 'leder', lead(second, 0), second.length ? second[0].v + ' poeng netto' : '');
+      add('Baseline', 'andre', 'Andreplass (30 % av 60 %)', 810, 'leder', lead(second, 0), second.length ? second[0].v + ' poeng netto' : '');
       const h1 = sums(gameweeks.filter((r) => Number(r.gw) <= 19));
-      add('Baseline', 'h1', 'Best første halvdel (GW1–19)', 40, maxGw > 19 ? 'vunnet' : 'leder', lead(h1, 0), lead(h1, 0).verdi + ' poeng netto');
+      add('Baseline', 'h1', 'Best første halvdel (GW1–19)', 360, maxGw > 19 ? 'vunnet' : 'leder', lead(h1, 0), lead(h1, 0).verdi + ' poeng netto');
       const h2 = sums(gameweeks.filter((r) => Number(r.gw) >= 20));
-      add('Baseline', 'h2', 'Best andre halvdel (GW20–38)', 40, h2.length ? (maxGw > 38 ? 'vunnet' : 'leder') : 'na', h2.length ? lead(h2, 0) : null, h2.length ? lead(h2, 0).verdi + ' poeng netto' : 'Starter i GW20');
+      add('Baseline', 'h2', 'Best andre halvdel (GW20–38)', 360, h2.length ? (maxGw > 38 ? 'vunnet' : 'leder') : 'na', h2.length ? lead(h2, 0) : null, h2.length ? lead(h2, 0).verdi + ' poeng netto' : 'Starter i GW20');
       const best = (rows, key, label) => {
         if (!rows.length) return null;
         const m = Math.max(...rows.map((r) => Number(r[key])));
@@ -1179,23 +1179,23 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
         return {lag: ls.join(' og '), lagnavn: ls.length === 1 ? navn[ls[0]] : '', lags: ls, verdi: m, gw: w[0].gw, kaptein: w[0].kaptein, label};
       };
       const tc = best(chips.filter((r) => r.chip === 'Triple Captain'), 'kaptein_poeng');
-      add('Extra 1', 'tc', 'Triple Captain (kun kapteinen)', 40, tc ? 'leder' : 'na', tc, tc ? tc.verdi + ' poeng (' + tc.kaptein + ', GW' + tc.gw + ')' : 'Ingen har brukt den');
+      add('Extra 1', 'tc', 'Triple Captain (kun kapteinen)', 360, tc ? 'leder' : 'na', tc, tc ? tc.verdi + ' poeng (' + tc.kaptein + ', GW' + tc.gw + ')' : 'Ingen har brukt den');
       const bb = best(chips.filter((r) => r.chip === 'Bench Boost'), 'gw_poeng');
-      add('Extra 1', 'bb', 'Bench Boost (15 spillere)', 40, bb ? 'leder' : 'na', bb, bb ? bb.verdi + ' poeng (GW' + bb.gw + ')' : 'Ingen har brukt den');
+      add('Extra 1', 'bb', 'Bench Boost (15 spillere)', 360, bb ? 'leder' : 'na', bb, bb ? bb.verdi + ' poeng (GW' + bb.gw + ')' : 'Ingen har brukt den');
       const fh = best(chips.filter((r) => r.chip === 'Free Hit'), 'gw_poeng');
-      add('Extra 1', 'fh', 'Free Hit', 40, fh ? 'leder' : 'na', fh, fh ? fh.verdi + ' poeng (GW' + fh.gw + ')' : 'Ingen har brukt den');
+      add('Extra 1', 'fh', 'Free Hit', 360, fh ? 'leder' : 'na', fh, fh ? fh.verdi + ' poeng (GW' + fh.gw + ')' : 'Ingen har brukt den');
       for (const [k, t, p, ms] of KV) {
         const rows = gameweeks.filter((r) => ms.includes(r.maaned));
         const lastIdx = Math.max(...ms.map((m) => MN.indexOf(m)));
         const s = sums(rows);
         const st = !rows.length ? 'na' : maxM > lastIdx ? 'vunnet' : 'leder';
-        add('Kvartal', k, t + ' (' + p + ')', 25, st, rows.length ? lead(s, 0) : null, rows.length ? lead(s, 0).verdi + ' poeng netto' : 'N/A');
+        add('Kvartal', k, t + ' (' + p + ')', 225, st, rows.length ? lead(s, 0) : null, rows.length ? lead(s, 0).verdi + ' poeng netto' : 'N/A');
       }
       for (const m of MN) {
         const rows = gameweeks.filter((r) => r.maaned === m);
         const s = sums(rows);
         const st = !rows.length ? 'na' : maxM > MN.indexOf(m) ? 'vunnet' : 'leder';
-        add('Måned', m, ML[m], 10, st, rows.length ? lead(s, 0) : null, rows.length ? lead(s, 0).verdi + ' poeng netto' : 'N/A');
+        add('Måned', m, ML[m], 90, st, rows.length ? lead(s, 0) : null, rows.length ? lead(s, 0).verdi + ' poeng netto' : 'N/A');
       }
       return out;
     }
@@ -1256,8 +1256,8 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
     };
     el.append(grp('Hovedspillene', (r) => r.gruppe === 'Baseline'));
     el.append(grp('Chip-spillene', (r) => r.gruppe === 'Extra 1'));
-    el.append(grp('Kvartalspremier (25 kr hver)', (r) => r.gruppe === 'Kvartal', true));
-    el.append(grp('Månedspremier (10 kr hver)', (r) => r.gruppe === 'Måned', true));
+    el.append(grp('Kvartalspremier (225 kr hver)', (r) => r.gruppe === 'Kvartal', true));
+    el.append(grp('Månedspremier (90 kr hver)', (r) => r.gruppe === 'Måned', true));
 
     const pl = {};
     for (const r of rows) {
@@ -1278,7 +1278,7 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
       c.append(r);
     }
     el.append(c);
-    el.append(mk('p', 'fp-note', 'Pott etter arket: 210 + 90 + 4 × 40 + 3 × 40 + 100 + 100 = 700 kr. Kvartalspremien er 100 / 4 = 25 kr og månedspremien 100 / 10 = 10 kr. Første halvdel er satt til GW1–19 og andre til GW20–38. Chip-spillene og hovedspillene regnes som «leder» til sesongen er ferdig.'));
+    el.append(mk('p', 'fp-note', 'Hver spiller legger inn 700 kr, så potten er 700 × 9 = 6 300 kr. Fordelingen per spill er: vinner 210, andreplass 90, halvdelene 40 hver, chip-spillene 40 hver, kvartalspremie 100 og månedspremie 100 per innsats, ganget med 9. Hver kvartalspremie er 225 kr og hver månedspremie 90 kr. Første halvdel er satt til GW1–19 og andre til GW20–38. Chip-spillene og hovedspillene regnes som «leder» til sesongen er ferdig.'));
   });
 
 })();}catch(e){console.error("SCRIPTERR "+e.stack)}</script>
