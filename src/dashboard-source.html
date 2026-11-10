@@ -139,6 +139,39 @@
   .fp-tab[aria-selected="true"] { background: var(--fp-ink); border-color: var(--fp-ink); color: #f4eee3; }
   .fp-tabs { display: grid; grid-template-columns: repeat(3, 1fr); }
   .fp-tab { padding: var(--cds-pad-sm) 4px; letter-spacing: .06em; font-size: 11px; text-align: center; white-space: nowrap; }
+
+  .fp-by-ctl { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+  .fp-by-hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 8px; }
+  .fp-by-tile { border: 1px solid var(--color-border-line); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+  .fp-by-tile .k { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--color-fg-muted); font-weight: 700; }
+  .fp-by-tile .v { font-family: var(--font-anthropic-serif); font-size: 1.5rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .fp-by-tile.good .v { color: var(--fp-s2); }
+  .fp-by-tile.bad .v { color: var(--color-bad); }
+  .fp-by-tile .s { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .fp-by-row { border-top: 1px solid var(--color-border-line); }
+  .fp-by-head { display: grid; grid-template-columns: 5.2rem 1fr 3.4rem; gap: 8px; align-items: center; width: 100%; padding: 8px 0; background: transparent; border: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
+  .fp-by-head:focus-visible { outline: 2px solid var(--fp-ink); outline-offset: 2px; }
+  .fp-by-name { font-weight: 600; }
+  .fp-by-name small { display: block; font-weight: 400; color: var(--color-fg-muted); font-size: 11px; }
+  .fp-by-bar { position: relative; height: 22px; }
+  .fp-by-bar::before { content: ""; position: absolute; left: var(--z, 50%); top: 0; bottom: 0; width: 1px; background: rgba(70,55,35,.35); }
+  .fp-by-bar i { position: absolute; top: 3px; height: 16px; border-radius: 3px; }
+  .fp-by-bar i.pos { background: var(--fp-s2); }
+  .fp-by-bar i.neg { background: var(--color-bad); }
+  .fp-by-bar i.hit { background: repeating-linear-gradient(45deg, #5b4a2f 0 4px, #8a7650 4px 8px); }
+  .fp-by-val { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .fp-by-val.pos { color: var(--fp-s2); }
+  .fp-by-val.neg { color: var(--color-bad); }
+  .fp-by-det { padding: 0 0 10px; display: flex; flex-direction: column; gap: 4px; }
+  .fp-by-det[hidden] { display: none; }
+  .fp-by-tr { display: grid; grid-template-columns: 2.4rem 1fr auto; gap: 8px; align-items: baseline; font-size: var(--cds-font-size-caption); }
+  .fp-by-tr .r { color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
+  .fp-by-tr .wc { font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 1px 5px; border-radius: 4px; background: rgba(140,106,50,.18); color: var(--fp-brass); margin-left: 6px; }
+  .fp-by-tr.off { opacity: .45; }
+  .fp-by-tr .d { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .fp-by-tr .d.pos { color: var(--fp-s2); }
+  .fp-by-tr .d.neg { color: var(--color-bad); }
+  .fp-by-hitrow { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .fp-pay { display: flex; flex-direction: column; gap: var(--cds-gap-lg); }
   .fp-pay-sum { display: flex; flex-direction: column; gap: 10px; }
   .fp-pay-big { display: flex; flex-wrap: wrap; gap: 6px 24px; align-items: baseline; }
@@ -605,6 +638,22 @@
           <tbody data-draw="matrise-rader" data-source="matrise"></tbody>
         </table>
       </div>
+    </div>
+
+    <div class="fp-card" id="bytter-kort">
+      <h3 class="fp-card-title">Byttene våre: hvem fikk mest ut av dem?</h3>
+      <p class="fp-note">Hvert bytte er innkommende spiller minus utgående spiller, målt i poeng mens du eide den innkommende (til du solgte ham, eller til og med runde 10). Hits er trukket fra. Free Hit-runder er holdt utenfor. Alle 15 spillere teller, også benk, og målvakt-bytter er tatt ut. Trykk på et lag for å se hvert bytte.</p>
+      <div class="fp-by-ctl">
+        <div class="fp-seg" role="group" aria-label="Periode" id="by-seg-m">
+          <button type="button" class="fp-segbtn" data-m="hold" aria-pressed="true">Hele holdeperioden</button>
+          <button type="button" class="fp-segbtn" data-m="imm" aria-pressed="false">Bare i bytterunden</button>
+        </div>
+        <div class="fp-seg" role="group" aria-label="Wildcard" id="by-seg-w">
+          <button type="button" class="fp-segbtn" data-w="0" aria-pressed="true">Uten Wildcard</button>
+          <button type="button" class="fp-segbtn" data-w="1" aria-pressed="false">Med Wildcard</button>
+        </div>
+      </div>
+      <div data-draw="bytter" data-source="bytter">—</div>
     </div>
   </section>
 
@@ -1267,6 +1316,92 @@
     el.append(c);
     el.append(mk('p', 'fp-note', 'Hver spiller legger inn 700 kr, så potten er 700 × 9 = 6 300 kr. Fordelingen per spill er: vinner 210, andreplass 90, halvdelene 40 hver, chip-spillene 40 hver, kvartalspremie 100 og månedspremie 100 per innsats, ganget med 9. Hver kvartalspremie er 225 kr og hver månedspremie 90 kr. Første halvdel er satt til GW1–19 og andre til GW20–38. Chip-spillene og hovedspillene regnes som «leder» til sesongen er ferdig.'));
   });
+</script>
+
+<script>
+  window.fpBytterData = {"Henrik":{"navn":"van Henche","hits":0,"items":[{"g":3,"x":"Anderson","y":"Cherki","e":3,"d":0,"i":0,"wc":1},{"g":3,"x":"B.Fernandes","y":"Groß","e":10,"d":35,"i":-1,"wc":1},{"g":3,"x":"Gabriel","y":"Gvardiol","e":10,"d":-19,"i":6,"wc":1},{"g":3,"x":"Calvert-Lewin","y":"Haaland","e":10,"d":25,"i":8,"wc":1},{"g":3,"x":"Maguire","y":"Hall","e":10,"d":19,"i":2,"wc":1},{"g":3,"x":"Muharemović","y":"Konsa","e":10,"d":3,"i":0,"wc":1},{"g":3,"x":"Mbeumo","y":"M.Sangaré","e":4,"d":-6,"i":-8,"wc":1},{"g":3,"x":"O.Dango","y":"Palmer","e":10,"d":3,"i":0,"wc":1},{"g":3,"x":"Thiago","y":"Wissa","e":6,"d":-7,"i":-1,"wc":1},{"g":4,"x":"Cherki","y":"Rogers","e":10,"d":-4,"i":7,"wc":0},{"g":5,"x":"M.Sangaré","y":"Belloumi","e":10,"d":9,"i":4,"wc":0},{"g":5,"x":"Szoboszlai","y":"Gibbs-White","e":6,"d":2,"i":0,"wc":0},{"g":7,"x":"Wissa","y":"Calvert-Lewin","e":10,"d":9,"i":8,"wc":0},{"g":7,"x":"Gibbs-White","y":"Cherki","e":9,"d":-2,"i":0,"wc":0},{"g":10,"x":"João Pedro","y":"N.Jackson","e":10,"d":11,"i":11,"wc":0},{"g":10,"x":"Cherki","y":"Tavernier","e":10,"d":-6,"i":-6,"wc":0}]},"Eirik":{"navn":"Six7even","hits":4,"items":[{"g":3,"x":"Tzolis","y":"Cherki","e":3,"d":-2,"i":-2,"wc":0},{"g":3,"x":"João Pedro","y":"Wissa","e":3,"d":0,"i":0,"wc":0},{"g":4,"x":"B.Fernandes","y":"Barnes","e":7,"d":9,"i":0,"wc":1},{"g":4,"x":"Bogle","y":"De Cuyper","e":10,"d":18,"i":-4,"wc":1},{"g":4,"x":"Calvert-Lewin","y":"Isak","e":5,"d":-2,"i":-8,"wc":1},{"g":4,"x":"Wissa","y":"João Pedro","e":8,"d":20,"i":10,"wc":1},{"g":4,"x":"Gvardiol","y":"Konsa","e":9,"d":22,"i":-5,"wc":1},{"g":4,"x":"Cherki","y":"Palmer","e":10,"d":-3,"i":4,"wc":1},{"g":4,"x":"Gomez","y":"Rogers","e":10,"d":-5,"i":5,"wc":1},{"g":4,"x":"Muharemović","y":"Thiaw","e":10,"d":-32,"i":-5,"wc":1},{"g":4,"x":"Szoboszlai","y":"Yalcouyé","e":5,"d":4,"i":5,"wc":1},{"g":4,"x":"Shaw","y":"van Ewijk","e":10,"d":9,"i":0,"wc":1},{"g":6,"x":"Isak","y":"Barry","e":10,"d":7,"i":6,"wc":0},{"g":6,"x":"Yalcouyé","y":"Groß","e":10,"d":18,"i":5,"wc":0},{"g":7,"x":"Ødegaard","y":"Semenyo","e":7,"d":-2,"i":-2,"wc":0},{"g":8,"x":"Barnes","y":"Foden","e":10,"d":-9,"i":-7,"wc":0},{"g":8,"x":"Semenyo","y":"Tavernier","e":10,"d":16,"i":10,"wc":0},{"g":9,"x":"João Pedro","y":"N.Jackson","e":10,"d":20,"i":9,"wc":0},{"g":10,"x":"Konsa","y":"Gabriel","e":10,"d":0,"i":0,"wc":0}]},"Bauge":{"navn":"Saka Potatoes","hits":4,"items":[{"g":3,"x":"Mbeumo","y":"Foden","e":3,"d":-7,"i":-7,"wc":0},{"g":3,"x":"Ballard","y":"Gvardiol","e":10,"d":24,"i":4,"wc":0},{"g":4,"x":"Foden","y":"Rogers","e":10,"d":23,"i":10,"wc":0},{"g":4,"x":"Szoboszlai","y":"Ødegaard","e":8,"d":6,"i":0,"wc":0},{"g":5,"x":"Maguire","y":"Konsa","e":10,"d":38,"i":-1,"wc":0},{"g":7,"x":"B.Fernandes","y":"Cherki","e":9,"d":-2,"i":-1,"wc":0},{"g":7,"x":"Gomez","y":"Palmer","e":10,"d":-11,"i":-6,"wc":0},{"g":9,"x":"João Pedro","y":"N.Jackson","e":10,"d":20,"i":9,"wc":0},{"g":9,"x":"Ødegaard","y":"Tavernier","e":10,"d":-8,"i":0,"wc":0},{"g":10,"x":"Cherki","y":"Ødegaard","e":10,"d":2,"i":2,"wc":0}]},"Waag":{"navn":"Jaisslemania","hits":8,"items":[{"g":2,"x":"Wirtz","y":"M.Sangaré","e":4,"d":-2,"i":0,"wc":0},{"g":3,"x":"Mbeumo","y":"Elanga","e":4,"d":-9,"i":-7,"wc":0},{"g":3,"x":"Tzolis","y":"Saka","e":7,"d":7,"i":-3,"wc":0},{"g":4,"x":"Maguire","y":"Dedić","e":7,"d":-9,"i":-1,"wc":0},{"g":5,"x":"Elanga","y":"Belloumi","e":7,"d":12,"i":4,"wc":0},{"g":5,"x":"M.Sangaré","y":"Gibbs-White","e":8,"d":0,"i":2,"wc":0},{"g":8,"x":"Ballard","y":"Ajer","e":10,"d":12,"i":2,"wc":1},{"g":8,"x":"Dedić","y":"De Cuyper","e":10,"d":0,"i":-10,"wc":1},{"g":8,"x":"Belloumi","y":"Foden","e":9,"d":-7,"i":-3,"wc":1},{"g":8,"x":"Diop","y":"Muharemović","e":10,"d":18,"i":8,"wc":1},{"g":8,"x":"Gomez","y":"Rogers","e":10,"d":-2,"i":-1,"wc":1},{"g":8,"x":"Saka","y":"Tavernier","e":10,"d":16,"i":10,"wc":1},{"g":8,"x":"Gvardiol","y":"Thomas","e":10,"d":-2,"i":0,"wc":1},{"g":8,"x":"Semenyo","y":"Ødegaard","e":10,"d":17,"i":3,"wc":1},{"g":9,"x":"João Pedro","y":"Isak","e":10,"d":10,"i":2,"wc":0},{"g":9,"x":"Gibbs-White","y":"Manzambi","e":10,"d":2,"i":5,"wc":0},{"g":10,"x":"Foden","y":"Kudus","e":10,"d":1,"i":1,"wc":0}]},"Næss":{"navn":"Jeremy Jakke","hits":8,"items":[{"g":3,"x":"Maguire","y":"Ajer","e":10,"d":12,"i":0,"wc":0},{"g":3,"x":"Tzolis","y":"Foden","e":4,"d":-9,"i":-4,"wc":0},{"g":5,"x":"Foden","y":"Gibbs-White","e":9,"d":-4,"i":2,"wc":0},{"g":5,"x":"João Pedro","y":"Gonzalo","e":10,"d":-4,"i":2,"wc":0},{"g":7,"x":"Shaw","y":"De Cuyper","e":10,"d":13,"i":6,"wc":0},{"g":7,"x":"Szoboszlai","y":"Manzambi","e":10,"d":6,"i":10,"wc":0},{"g":8,"x":"Calvert-Lewin","y":"João Pedro","e":9,"d":-2,"i":-2,"wc":0},{"g":8,"x":"B.Fernandes","y":"Rogers","e":10,"d":-7,"i":1,"wc":0},{"g":10,"x":"João Pedro","y":"Isak","e":10,"d":8,"i":8,"wc":0},{"g":10,"x":"Gibbs-White","y":"Tavernier","e":10,"d":-2,"i":-2,"wc":0}]},"Cedric":{"navn":"cedric's Team","hits":0,"items":[{"g":3,"x":"Mbeumo","y":"Cherki","e":4,"d":-6,"i":-5,"wc":0},{"g":3,"x":"Senesi","y":"De Cuyper","e":10,"d":56,"i":4,"wc":0},{"g":4,"x":"Szoboszlai","y":"Ødegaard","e":4,"d":0,"i":0,"wc":0},{"g":5,"x":"Hume","y":"Ajayi","e":9,"d":-2,"i":0,"wc":1},{"g":5,"x":"Calvert-Lewin","y":"Akpom","e":6,"d":-2,"i":-1,"wc":1},{"g":5,"x":"Cherki","y":"Bruno G.","e":10,"d":-8,"i":-7,"wc":1},{"g":5,"x":"O'Reilly","y":"Davis","e":10,"d":-5,"i":1,"wc":1},{"g":5,"x":"Tzolis","y":"Gibbs-White","e":9,"d":3,"i":0,"wc":1},{"g":5,"x":"Ødegaard","y":"Groß","e":10,"d":14,"i":12,"wc":1},{"g":5,"x":"Isak","y":"Haaland","e":10,"d":1,"i":-2,"wc":1},{"g":5,"x":"Shaw","y":"Konsa","e":10,"d":41,"i":-1,"wc":1},{"g":7,"x":"Akpom","y":"Gonzalo","e":9,"d":3,"i":1,"wc":0},{"g":7,"x":"B.Fernandes","y":"Palmer","e":10,"d":-2,"i":1,"wc":0},{"g":10,"x":"Gibbs-White","y":"Manzambi","e":10,"d":-3,"i":-3,"wc":0},{"g":10,"x":"Gonzalo","y":"N.Jackson","e":10,"d":9,"i":9,"wc":0},{"g":10,"x":"Ajayi","y":"Van Hecke","e":10,"d":-2,"i":-2,"wc":0}]},"Hakki":{"navn":"LykkeBambus","hits":4,"items":[{"g":4,"x":"Estêvão","y":"Munoz","e":7,"d":10,"i":0,"wc":0},{"g":4,"x":"Mbeumo","y":"Rogers","e":10,"d":8,"i":6,"wc":0},{"g":6,"x":"Pedro Porro","y":"Calafiori","e":10,"d":21,"i":9,"wc":0},{"g":6,"x":"Tzolis","y":"Groß","e":10,"d":17,"i":6,"wc":0},{"g":7,"x":"Kerkez","y":"De Cuyper","e":10,"d":11,"i":4,"wc":0},{"g":8,"x":"Munoz","y":"Schade","e":10,"d":5,"i":2,"wc":0}]},"Marius":{"navn":"Post it!","hits":0,"items":[{"g":3,"x":"Brobbey","y":"Wissa","e":8,"d":-15,"i":-1,"wc":0},{"g":3,"x":"Wirtz","y":"Ødegaard","e":10,"d":-4,"i":7,"wc":0},{"g":6,"x":"Hughes","y":"Belloumi","e":10,"d":15,"i":6,"wc":0},{"g":6,"x":"Calvert-Lewin","y":"Emersonn","e":10,"d":-9,"i":0,"wc":0},{"g":8,"x":"Mosquera","y":"De Cuyper","e":10,"d":16,"i":1,"wc":0},{"g":9,"x":"Wissa","y":"Calvert-Lewin","e":9,"d":1,"i":1,"wc":0},{"g":10,"x":"B.Fernandes","y":"Palmer","e":10,"d":-8,"i":-8,"wc":0},{"g":10,"x":"Mbeumo","y":"Rogers","e":10,"d":0,"i":0,"wc":0},{"g":10,"x":"Calvert-Lewin","y":"Thiago","e":10,"d":-4,"i":-4,"wc":0}]},"Morten":{"navn":"Sleivdal","hits":12,"items":[{"g":4,"x":"B.Fernandes","y":"Cherki","e":10,"d":11,"i":-1,"wc":1},{"g":4,"x":"Hato","y":"Gvardiol","e":10,"d":5,"i":11,"wc":1},{"g":4,"x":"Calvert-Lewin","y":"Isak","e":6,"d":-4,"i":-8,"wc":1},{"g":4,"x":"Kusi-Asare","y":"João Pedro","e":4,"d":12,"i":12,"wc":1},{"g":4,"x":"O'Reilly","y":"Mendy","e":10,"d":-1,"i":0,"wc":1},{"g":4,"x":"Foden","y":"Palmer","e":5,"d":9,"i":7,"wc":1},{"g":4,"x":"Rogers","y":"Yalcouyé","e":10,"d":-19,"i":0,"wc":1},{"g":4,"x":"Tzolis","y":"Ødegaard","e":10,"d":15,"i":0,"wc":1},{"g":5,"x":"Szoboszlai","y":"Gibbs-White","e":6,"d":2,"i":0,"wc":0},{"g":5,"x":"João Pedro","y":"Igor Jesus","e":5,"d":1,"i":1,"wc":0},{"g":6,"x":"Konsa","y":"De Cuyper","e":10,"d":-8,"i":11,"wc":0},{"g":6,"x":"Palmer","y":"Saka","e":7,"d":-5,"i":-6,"wc":0},{"g":6,"x":"Igor Jesus","y":"Wissa","e":7,"d":3,"i":2,"wc":0},{"g":7,"x":"Gibbs-White","y":"Barcola","e":10,"d":7,"i":4,"wc":0},{"g":7,"x":"Isak","y":"João Pedro","e":8,"d":-16,"i":-7,"wc":0},{"g":8,"x":"Wissa","y":"Isak","e":10,"d":15,"i":8,"wc":0},{"g":8,"x":"Saka","y":"Rogers","e":10,"d":12,"i":1,"wc":0},{"g":9,"x":"João Pedro","y":"N.Jackson","e":10,"d":20,"i":9,"wc":0}]}};
+  dash.calc('bytter', {
+    title: 'Byttene våre',
+    description: 'Netto poeng fra bytter per lag (innkommende minus utgående), uten Free Hit. Detaljene ligger i siden.',
+    inputs: ['gameweeks'],
+    fn: (gameweeks) => [{ok: 1}]
+  });
+  window.fpBy = {m: 'hold', w: 0, open: null};
+  dash.draw('bytter', (el) => {
+    const D = window.fpBytterData, st = window.fpBy;
+    el.replaceChildren();
+    const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+    const sg = (n) => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n);
+    const cl = (n) => (n > 0 ? 'pos' : n < 0 ? 'neg' : '');
+    const key = st.m === 'hold' ? 'd' : 'i';
+    const teams = Object.keys(D).map((t) => {
+      const its = D[t].items.filter((i) => st.w || !i.wc);
+      const gain = its.reduce((a, i) => a + i[key], 0);
+      const hits = D[t].hits;
+      return {t, navn: D[t].navn, its, gain, hits, net: gain - hits};
+    }).sort((a, b) => b.net - a.net);
+    const all = teams.flatMap((x) => x.its.map((i) => ({...i, t: x.t})));
+    const best = all.reduce((a, b) => (b[key] > a[key] ? b : a));
+    const worst = all.reduce((a, b) => (b[key] < a[key] ? b : a));
+    const hero = mk('div', 'fp-by-hero');
+    const tile = (cls, k, v, s) => { const t = mk('div', 'fp-by-tile ' + cls); t.append(mk('div', 'k', k), mk('div', 'v', v), mk('div', 's', s)); return t; };
+    hero.append(
+      tile('good', 'Beste lag', teams[0].t + ' ' + sg(teams[0].net), 'netto etter hits'),
+      tile('good', 'Beste bytte', best.x + ' → ' + best.y, sg(best[key]) + ' poeng · ' + best.t + ' · R' + best.g),
+      tile('bad', 'Verste bytte', worst.x + ' → ' + worst.y, sg(worst[key]) + ' poeng · ' + worst.t + ' · R' + worst.g)
+    );
+    el.append(hero);
+    const negMax = Math.max(...teams.map((x) => (x.gain >= 0 ? x.hits : Math.abs(x.gain) + x.hits)), 1);
+    const posMax = Math.max(...teams.map((x) => Math.max(x.gain, 0)), 1);
+    const tot = negMax + posMax, z = (negMax / tot) * 100;
+    const list = mk('div');
+    for (const x of teams) {
+      const row = mk('div', 'fp-by-row');
+      const head = mk('button', 'fp-by-head'); head.type = 'button'; head.setAttribute('aria-expanded', String(st.open === x.t));
+      const nm = mk('div', 'fp-by-name', x.t); nm.append(mk('small', '', x.its.length + ' bytter'));
+      const bar = mk('div', 'fp-by-bar');
+      bar.style.setProperty('--z', z + '%');
+      const gw = (Math.abs(x.gain) / tot) * 100;
+      const g = mk('i', x.gain >= 0 ? 'pos' : 'neg');
+      g.style.width = gw + '%'; g.style.left = (x.gain >= 0 ? z : z - gw) + '%';
+      bar.append(g);
+      if (x.hits) {
+        const hw = (x.hits / tot) * 100; const h = mk('i', 'hit'); h.style.width = hw + '%';
+        h.style.left = (x.gain >= 0 ? z - hw : z - gw - hw) + '%';
+        h.title = 'Hits −' + x.hits; bar.append(h);
+      }
+      head.append(nm, bar, mk('div', 'fp-by-val ' + cl(x.net), sg(x.net)));
+      head.addEventListener('click', () => { st.open = st.open === x.t ? null : x.t; dash.draw('bytter'); });
+      row.append(head);
+      if (st.open === x.t) {
+        const det = mk('div', 'fp-by-det');
+        const its = D[x.t].items.slice().sort((a, b) => a.g - b.g);
+        for (const i of its) {
+          const off = i.wc && !st.w;
+          const tr = mk('div', 'fp-by-tr' + (off ? ' off' : ''));
+          const mid = mk('div', '', i.x + ' → ' + i.y);
+          if (i.wc) mid.append(mk('span', 'wc', 'WC'));
+          tr.append(mk('span', 'r', 'R' + i.g), mid, mk('span', 'd ' + cl(i[key]), sg(i[key])));
+          det.append(tr);
+        }
+        det.append(mk('div', 'fp-by-hitrow', 'Bytter ' + sg(x.gain) + ' · hits ' + (x.hits ? '−' + x.hits : '0') + ' · netto ' + sg(x.net)));
+        row.append(det);
+      }
+      list.append(row);
+    }
+    el.append(list);
+    el.append(mk('p', 'fp-note', 'Grønn stolpe er poeng vunnet på byttene, rød er tapt. Skravert del er hits.'));
+  });
+  document.querySelectorAll('#by-seg-m .fp-segbtn').forEach((b) => b.addEventListener('click', () => {
+    window.fpBy.m = b.dataset.m;
+    document.querySelectorAll('#by-seg-m .fp-segbtn').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    dash.draw('bytter');
+  }));
+  document.querySelectorAll('#by-seg-w .fp-segbtn').forEach((b) => b.addEventListener('click', () => {
+    window.fpBy.w = Number(b.dataset.w);
+    document.querySelectorAll('#by-seg-w .fp-segbtn').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    dash.draw('bytter');
+  }));
 </script>
 
 <script>
