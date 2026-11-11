@@ -1357,7 +1357,7 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
     inputs: ['gameweeks'],
     fn: (gameweeks) => [{ok: 1}]
   });
-  window.fpBy = {m: 'hold', w: 0, open: null};
+  window.fpBy = {m: 'hold', w: 0, open: []};
   dash.draw('bytter', (el) => {
     const D = window.fpBytterData, st = window.fpBy;
     el.replaceChildren();
@@ -1389,7 +1389,7 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
     const list = mk('div');
     for (const x of teams) {
       const row = mk('div', 'fp-by-row');
-      const head = mk('button', 'fp-by-head'); head.type = 'button'; head.setAttribute('aria-expanded', String(st.open === x.t));
+      const head = mk('button', 'fp-by-head'); head.type = 'button'; head.setAttribute('aria-expanded', String(st.open.includes(x.t)));
       const nm = mk('div', 'fp-by-name', x.t); const sm = mk('small', '', x.its.length + ' bytter · snitt ' + sgd(x.avg));
       const wcg = D[x.t].items.filter((i) => i.wc).map((i) => i.g)[0];
       if (st.w && wcg) { const w = mk('span', 'fp-by-wcpill', 'WC R' + wcg); sm.append(document.createTextNode(' '), w); }
@@ -1406,9 +1406,9 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
         h.title = 'Hits −' + x.hits; bar.append(h);
       }
       head.append(nm, bar, mk('div', 'fp-by-val ' + cl(x.net), sg(x.net)));
-      head.addEventListener('click', () => { st.open = st.open === x.t ? null : x.t; dash.draw('bytter'); });
+      head.addEventListener('click', () => { st.open = st.open.includes(x.t) ? st.open.filter((q) => q !== x.t) : st.open.concat(x.t); dash.draw('bytter'); });
       row.append(head);
-      if (st.open === x.t) {
+      if (st.open.includes(x.t)) {
         const det = mk('div', 'fp-by-det');
         det.append(mk('div', 'fp-by-dethead', 'Topp 5 utslagsgivende bytter · ' + x.t));
         const top = x.its.slice().sort((p, q) => Math.abs(q[key]) - Math.abs(p[key])).slice(0, 5);
