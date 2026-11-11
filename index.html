@@ -160,7 +160,7 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
   .fp-by-tile.bad .v { color: var(--color-bad); }
   .fp-by-tile .s { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
   .fp-by-row { border-top: 1px solid var(--color-border-line); }
-  .fp-by-head { display: grid; grid-template-columns: 5.2rem 1fr 3.4rem; gap: 8px; align-items: center; width: 100%; padding: 8px 0; background: transparent; border: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
+  .fp-by-head { display: grid; grid-template-columns: 7.2rem 1fr 3.2rem; gap: 8px; align-items: center; width: 100%; padding: 8px 0; background: transparent; border: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
   .fp-by-head:focus-visible { outline: 2px solid var(--fp-ink); outline-offset: 2px; }
   .fp-by-name { font-weight: 600; }
   .fp-by-name small { display: block; font-weight: 400; color: var(--color-fg-muted); font-size: 11px; }
@@ -173,9 +173,10 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
   .fp-by-val { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
   .fp-by-val.pos { color: var(--fp-s2); }
   .fp-by-val.neg { color: var(--color-bad); }
-  .fp-by-det { padding: 0 0 10px; display: flex; flex-direction: column; gap: 4px; }
+  .fp-by-det { margin: 2px 0 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; background: rgba(140,106,50,.12); border: 1px solid rgba(140,106,50,.35); border-left: 4px solid var(--fp-brass); border-radius: 8px; box-shadow: 0 3px 10px rgba(70,55,35,.18); }
+  .fp-by-dethead { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--fp-brass); }
   .fp-by-det[hidden] { display: none; }
-  .fp-by-tr { display: grid; grid-template-columns: 2.4rem 1fr auto; gap: 8px; align-items: baseline; font-size: var(--cds-font-size-caption); }
+  .fp-by-tr { display: grid; grid-template-columns: 3.4rem 1fr auto; gap: 8px; align-items: baseline; font-size: var(--cds-font-size-caption); }
   .fp-by-tr .r { color: var(--color-fg-muted); font-variant-numeric: tabular-nums; }
   .fp-by-tr .wc { font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 1px 5px; border-radius: 4px; background: rgba(140,106,50,.18); color: var(--fp-brass); margin-left: 6px; }
   .fp-by-tr.off { opacity: .45; }
@@ -1363,12 +1364,13 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
     const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
     const sg = (n) => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n);
     const cl = (n) => (n > 0 ? 'pos' : n < 0 ? 'neg' : '');
+    const sgd = (n) => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n).toFixed(1).replace('.', ',');
     const key = st.m === 'hold' ? 'd' : 'i';
     const teams = Object.keys(D).map((t) => {
       const its = D[t].items.filter((i) => st.w || !i.wc);
       const gain = its.reduce((a, i) => a + i[key], 0);
       const hits = D[t].hits;
-      return {t, navn: D[t].navn, its, gain, hits, net: gain - hits};
+      return {t, navn: D[t].navn, its, gain, hits, net: gain - hits, avg: its.length ? gain / its.length : 0};
     }).sort((a, b) => b.net - a.net);
     const all = teams.flatMap((x) => x.its.map((i) => ({...i, t: x.t})));
     const best = all.reduce((a, b) => (b[key] > a[key] ? b : a));
@@ -1388,7 +1390,7 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
     for (const x of teams) {
       const row = mk('div', 'fp-by-row');
       const head = mk('button', 'fp-by-head'); head.type = 'button'; head.setAttribute('aria-expanded', String(st.open === x.t));
-      const nm = mk('div', 'fp-by-name', x.t); const sm = mk('small', '', x.its.length + ' bytter');
+      const nm = mk('div', 'fp-by-name', x.t); const sm = mk('small', '', x.its.length + ' bytter · snitt ' + sgd(x.avg));
       const wcg = D[x.t].items.filter((i) => i.wc).map((i) => i.g)[0];
       if (st.w && wcg) { const w = mk('span', 'fp-by-wcpill', 'WC R' + wcg); sm.append(document.createTextNode(' '), w); }
       nm.append(sm);
@@ -1408,16 +1410,16 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
       row.append(head);
       if (st.open === x.t) {
         const det = mk('div', 'fp-by-det');
-        const its = D[x.t].items.slice().sort((a, b) => a.g - b.g);
-        for (const i of its) {
-          const off = i.wc && !st.w;
-          const tr = mk('div', 'fp-by-tr' + (off ? ' off' : ''));
+        det.append(mk('div', 'fp-by-dethead', 'Topp 5 utslagsgivende bytter · ' + x.t));
+        const top = x.its.slice().sort((p, q) => Math.abs(q[key]) - Math.abs(p[key])).slice(0, 5);
+        top.forEach((i, n) => {
+          const tr = mk('div', 'fp-by-tr');
           const mid = mk('div', '', i.x + ' → ' + i.y);
           if (i.wc) mid.append(mk('span', 'wc', 'WC'));
-          tr.append(mk('span', 'r', 'R' + i.g), mid, mk('span', 'd ' + cl(i[key]), sg(i[key])));
+          tr.append(mk('span', 'r', (n + 1) + '. R' + i.g), mid, mk('span', 'd ' + cl(i[key]), sg(i[key])));
           det.append(tr);
-        }
-        det.append(mk('div', 'fp-by-hitrow', 'Bytter ' + sg(x.gain) + ' · hits ' + (x.hits ? '−' + x.hits : '0') + ' · netto ' + sg(x.net)));
+        });
+        det.append(mk('div', 'fp-by-hitrow', x.its.length + ' bytter · snitt ' + sgd(x.avg) + ' per bytte · bytter ' + sg(x.gain) + ' · hits ' + (x.hits ? '−' + x.hits : '0') + ' · netto ' + sg(x.net)));
         row.append(det);
       }
       list.append(row);
@@ -1514,5 +1516,6 @@ window.dash={colors:['#1f3550','#2f6b4f','#8a3b2e','#999','#aaa','#bbb','#ccc','
 window.addEventListener('load',()=>{
  for(const [n,f] of Object.entries(dash._draw)){ document.querySelectorAll('[data-draw="'+n+'"]').forEach(el=>{ try{ (typeof f==='function'?f:f.mount)(el);}catch(e){console.error('DRAWERR '+n+' '+e.stack);} }); }
  for(const f of dash._on){ try{f();}catch(e){console.error('ONDATAERR '+e.stack);} }
+ 
 });
 </script>
