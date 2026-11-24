@@ -285,6 +285,33 @@
   .fp-method { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: var(--cds-gap-xs); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); max-width: 62rem; }
   [data-dash-source-state=empty] { color: transparent; }
   [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+  .fp-ne { display: flex; flex-direction: column; gap: 10px; }
+  .fp-ne-card { border: 1px solid var(--color-border-line); border-radius: 10px; background: var(--color-panel); overflow: hidden; }
+  .fp-ne-head { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; width: 100%; padding: 12px; background: transparent; border: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
+  .fp-ne-head:focus-visible { outline: 2px solid var(--fp-ink); outline-offset: -2px; }
+  .fp-ne-name { font-weight: 700; }
+  .fp-ne-name small { display: block; font-weight: 400; color: var(--color-fg-muted); font-size: 11px; }
+  .fp-ne-xp { text-align: right; font-family: var(--font-anthropic-serif); font-size: 1.6rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .fp-ne-xp small { display: block; font-family: inherit; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--color-fg-muted); font-weight: 700; }
+  .fp-ne-ft { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; }
+  .fp-ne-ftdots { display: inline-flex; gap: 3px; }
+  .fp-ne-ftdots i { width: 10px; height: 10px; border-radius: 50%; background: var(--fp-s2); }
+  .fp-ne-ftdots i.off { background: transparent; border: 1px solid var(--color-border-line); }
+  .fp-ne-ft b { font-variant-numeric: tabular-nums; }
+  .fp-ne-stats { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .fp-ne-stat { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .fp-ne-stat .k { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-fg-muted); font-weight: 700; }
+  .fp-ne-stat .v { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .fp-ne-stat .v.pos { color: var(--fp-s2); }
+  .fp-ne-stat .v.neg { color: var(--color-bad); }
+  .fp-ne-det { padding: 4px 12px 12px; border-top: 1px solid var(--color-border-line); background: rgba(140,106,50,.08); }
+  .fp-ne-tbl { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+  .fp-ne-tbl th { text-align: right; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--color-fg-muted); padding: 8px 0 4px; }
+  .fp-ne-tbl th:first-child, .fp-ne-tbl td:first-child { text-align: left; }
+  .fp-ne-tbl td { text-align: right; padding: 3px 0; border-top: 1px solid rgba(70,55,35,.08); }
+  .fp-ne-tbl td small { color: var(--color-fg-muted); margin-left: 4px; }
+  .fp-ne-tbl tr.sep td { border-top: 0; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--fp-brass); text-align: left; padding-top: 8px; }
+  .fp-ne-warn { color: var(--color-bad); font-weight: 700; margin-left: 4px; }
 </style>
 
 <div class="fp-bg">
@@ -299,6 +326,7 @@
     <button type="button" class="fp-tab" role="tab" data-tab="chips" aria-selected="false">Chips</button>
     <button type="button" class="fp-tab" role="tab" data-tab="runder" aria-selected="false">Alle runder</button>
     <button type="button" class="fp-tab" role="tab" data-tab="payout" aria-selected="false">Payout</button>
+    <button type="button" class="fp-tab" role="tab" data-tab="neste" aria-selected="false">Neste runde</button>
     <button type="button" class="fp-tab" role="tab" data-tab="redaksjonen" aria-selected="false">Redaksjonen</button>
   </nav>
 
@@ -676,6 +704,12 @@
   <section class="fp-panel" id="payout" role="tabpanel" hidden>
     <h2 class="fp-h2">Payout</h2>
     <div class="fp-pay" data-draw="payout" data-source="payout">—</div>
+  </section>
+
+  <section class="fp-panel" id="neste" role="tabpanel" hidden>
+    <h2 class="fp-h2" id="neste-h">Neste runde</h2>
+    <p class="fp-note" id="neste-sub"></p>
+    <div class="fp-ne" data-draw="neste" data-source="neste">—</div>
   </section>
 
   <section class="fp-panel" id="redaksjonen" role="tabpanel" hidden>
@@ -1456,7 +1490,88 @@
 </script>
 
 <script>
-  const fpTabs = ['oppsummering', 'oversikt', 'chips', 'runder', 'payout', 'redaksjonen'];
+  window.fpNeste = {"gw":12,"deadline":"2026-11-27T18:30:00Z","dataGw":10,"teams":{"Henrik":{"navn":"van Henche","ft":4,"miss":["Bentley"],"pl":[{"n":"Belloumi","pos":"MID","xp":4.0,"pr":5.2,"own":8.9,"dc":9.06,"min":775,"g":7,"xgi":3.12,"st":"a","ch":100},{"n":"Bentley","pos":null,"xp":null,"pr":null,"own":null,"dc":null,"est":1},{"n":"Calafiori","pos":"DEF","xp":3.68,"pr":5.9,"own":48.3,"dc":4.83,"min":857,"g":3,"xgi":2.3,"st":"a","ch":100},{"n":"Calvert-Lewin","pos":"FWD","xp":4.85,"pr":6,"own":17.2,"dc":3.59,"min":953,"g":6,"xgi":6.06,"st":"a","ch":100},{"n":"De Cuyper","pos":"DEF","xp":5.16,"pr":5.5,"own":50.1,"dc":3.55,"min":912,"g":6,"xgi":4.35,"st":"a","ch":null},{"n":"Groß","pos":"MID","xp":6.05,"pr":6.3,"own":49.5,"dc":6.4,"min":970,"g":10,"xgi":5.69,"st":"a","ch":null},{"n":"Haaland","pos":"FWD","xp":4.68,"pr":15.8,"own":77.7,"dc":2.94,"min":979,"g":9,"xgi":9.01,"st":"a","ch":100},{"n":"Hall","pos":"DEF","xp":2.31,"pr":5.2,"own":16.2,"dc":8.37,"min":989,"g":2,"xgi":1.57,"st":"d","ch":75},{"n":"Konsa","pos":"DEF","xp":4.7,"pr":4.9,"own":25.4,"dc":8.0,"min":821,"g":1,"xgi":0.69,"st":"a","ch":100},{"n":"N.Jackson","pos":"FWD","xp":6.18,"pr":7.3,"own":36.4,"dc":3.06,"min":794,"g":7,"xgi":4.69,"st":"a","ch":null},{"n":"Palmer","pos":"MID","xp":3.85,"pr":9.8,"own":27.4,"dc":5.86,"min":968,"g":7,"xgi":3.83,"st":"a","ch":100},{"n":"Raya","pos":"GK","xp":1.92,"pr":6.3,"own":45.9,"dc":0,"min":969,"g":0,"xgi":0.01,"st":"d","ch":50},{"n":"Rogers","pos":"MID","xp":3.92,"pr":8.3,"own":54.6,"dc":7.7,"min":970,"g":7,"xgi":4.79,"st":"a","ch":null},{"n":"Tavernier","pos":"MID","xp":5.17,"pr":6.8,"own":33.5,"dc":8.23,"min":930,"g":6,"xgi":6.63,"st":"a","ch":null},{"n":"Vuskovic","pos":"DEF","xp":4.86,"pr":5.3,"own":11.6,"dc":9.03,"min":977,"g":3,"xgi":1.48,"st":"a","ch":null}]},"Eirik":{"navn":"Six7even","ft":2,"miss":[],"pl":[{"n":"Barry","pos":"FWD","xp":6.29,"pr":5.7,"own":11.5,"dc":3.72,"min":919,"g":7,"xgi":7.89,"st":"a","ch":null},{"n":"Calafiori","pos":"DEF","xp":3.68,"pr":5.9,"own":48.3,"dc":4.83,"min":857,"g":3,"xgi":2.3,"st":"a","ch":100},{"n":"De Cuyper","pos":"DEF","xp":5.16,"pr":5.5,"own":50.1,"dc":3.55,"min":912,"g":6,"xgi":4.35,"st":"a","ch":null},{"n":"Dubravka","pos":"GK","xp":0,"pr":3.9,"own":14.7,"dc":0,"min":0,"g":0,"xgi":0,"st":"a","ch":null},{"n":"Foden","pos":"MID","xp":2.24,"pr":6.8,"own":2,"dc":5.44,"min":430,"g":3,"xgi":4.08,"st":"a","ch":100},{"n":"Gabriel","pos":"DEF","xp":4.74,"pr":8.1,"own":26.8,"dc":8.82,"min":990,"g":1,"xgi":1.73,"st":"a","ch":null},{"n":"Groß","pos":"MID","xp":6.05,"pr":6.3,"own":49.5,"dc":6.4,"min":970,"g":10,"xgi":5.69,"st":"a","ch":null},{"n":"Haaland","pos":"FWD","xp":4.68,"pr":15.8,"own":77.7,"dc":2.94,"min":979,"g":9,"xgi":9.01,"st":"a","ch":100},{"n":"Kinsky","pos":"GK","xp":3.44,"pr":4.4,"own":16.2,"dc":0,"min":990,"g":0,"xgi":0,"st":"a","ch":null},{"n":"N.Jackson","pos":"FWD","xp":6.18,"pr":7.3,"own":36.4,"dc":3.06,"min":794,"g":7,"xgi":4.69,"st":"a","ch":null},{"n":"Palmer","pos":"MID","xp":3.85,"pr":9.8,"own":27.4,"dc":5.86,"min":968,"g":7,"xgi":3.83,"st":"a","ch":100},{"n":"Rogers","pos":"MID","xp":3.92,"pr":8.3,"own":54.6,"dc":7.7,"min":970,"g":7,"xgi":4.79,"st":"a","ch":null},{"n":"Tavernier","pos":"MID","xp":5.17,"pr":6.8,"own":33.5,"dc":8.23,"min":930,"g":6,"xgi":6.63,"st":"a","ch":null},{"n":"Thiaw","pos":"DEF","xp":2.24,"pr":4.9,"own":1.3,"dc":8.61,"min":805,"g":1,"xgi":0.45,"st":"a","ch":null},{"n":"van Ewijk","pos":"DEF","xp":2.84,"pr":3.9,"own":6.8,"dc":7.9,"min":900,"g":1,"xgi":0.6,"st":"a","ch":100}]},"Bauge":{"navn":"Saka Potatoes","ft":1,"miss":[],"pl":[{"n":"Calafiori","pos":"DEF","xp":3.68,"pr":5.9,"own":48.3,"dc":4.83,"min":857,"g":3,"xgi":2.3,"st":"a","ch":100},{"n":"Calvert-Lewin","pos":"FWD","xp":4.85,"pr":6,"own":17.2,"dc":3.59,"min":953,"g":6,"xgi":6.06,"st":"a","ch":100},{"n":"Groß","pos":"MID","xp":6.05,"pr":6.3,"own":49.5,"dc":6.4,"min":970,"g":10,"xgi":5.69,"st":"a","ch":null},{"n":"Gvardiol","pos":"DEF","xp":3.05,"pr":5.5,"own":19.6,"dc":6.7,"min":712,"g":5,"xgi":1.79,"st":"a","ch":100},{"n":"Haaland","pos":"FWD","xp":4.68,"pr":15.8,"own":77.7,"dc":2.94,"min":979,"g":9,"xgi":9.01,"st":"a","ch":100},{"n":"Kinsky","pos":"GK","xp":3.44,"pr":4.4,"own":16.2,"dc":0,"min":990,"g":0,"xgi":0,"st":"a","ch":null},{"n":"Konsa","pos":"DEF","xp":4.7,"pr":4.9,"own":25.4,"dc":8.0,"min":821,"g":1,"xgi":0.69,"st":"a","ch":100},{"n":"N.Jackson","pos":"FWD","xp":6.18,"pr":7.3,"own":36.4,"dc":3.06,"min":794,"g":7,"xgi":4.69,"st":"a","ch":null},{"n":"O'Shea","pos":"DEF","xp":3.24,"pr":4,"own":2.6,"dc":9.64,"min":990,"g":1,"xgi":0.65,"st":"a","ch":null},{"n":"Palmer","pos":"MID","xp":3.85,"pr":9.8,"own":27.4,"dc":5.86,"min":968,"g":7,"xgi":3.83,"st":"a","ch":100},{"n":"Rogers","pos":"MID","xp":3.92,"pr":8.3,"own":54.6,"dc":7.7,"min":970,"g":7,"xgi":4.79,"st":"a","ch":null},{"n":"Tavernier","pos":"MID","xp":5.17,"pr":6.8,"own":33.5,"dc":8.23,"min":930,"g":6,"xgi":6.63,"st":"a","ch":null},{"n":"Van Hecke","pos":"DEF","xp":4.89,"pr":5.2,"own":19.3,"dc":8,"min":990,"g":2,"xgi":2.54,"st":"a","ch":100},{"n":"Verbruggen","pos":"GK","xp":4.28,"pr":4.7,"own":24.7,"dc":0,"min":990,"g":0,"xgi":0.21,"st":"a","ch":null},{"n":"Ødegaard","pos":"MID","xp":4.73,"pr":6.7,"own":16.7,"dc":4.73,"min":913,"g":4,"xgi":5.31,"st":"a","ch":null}]},"Waag":{"navn":"Jaisslemania","ft":4,"miss":[],"pl":[{"n":"Ajer","pos":"DEF","xp":3.39,"pr":4.5,"own":3.9,"dc":9.64,"min":990,"g":1,"xgi":0.75,"st":"a","ch":null},{"n":"Calafiori","pos":"DEF","xp":3.68,"pr":5.9,"own":48.3,"dc":4.83,"min":857,"g":3,"xgi":2.3,"st":"a","ch":100},{"n":"Calvert-Lewin","pos":"FWD","xp":4.85,"pr":6,"own":17.2,"dc":3.59,"min":953,"g":6,"xgi":6.06,"st":"a","ch":100},{"n":"De Cuyper","pos":"DEF","xp":5.16,"pr":5.5,"own":50.1,"dc":3.55,"min":912,"g":6,"xgi":4.35,"st":"a","ch":null},{"n":"Haaland","pos":"FWD","xp":4.68,"pr":15.8,"own":77.7,"dc":2.94,"min":979,"g":9,"xgi":9.01,"st":"a","ch":100},{"n":"Isak","pos":"FWD","xp":5.37,"pr":9.3,"own":26.9,"dc":2.38,"min":831,"g":8,"xgi":6.52,"st":"a","ch":100},{"n":"Kudus","pos":"MID","xp":4.03,"pr":6.6,"own":2.5,"dc":8.65,"min":624,"g":3,"xgi":2.49,"st":"a","ch":100},{"n":"Manzambi","pos":"MID","xp":4.64,"pr":6.2,"own":8.7,"dc":7.27,"min":520,"g":5,"xgi":2.71,"st":"a","ch":100},{"n":"Muharemović","pos":"DEF","xp":5.25,"pr":5.1,"own":7.3,"dc":10.73,"min":990,"g":2,"xgi":0.9,"st":"a","ch":null},{"n":"Raya","pos":"GK","xp":1.92,"pr":6.3,"own":45.9,"dc":0,"min":969,"g":0,"xgi":0.01,"st":"d","ch":50},{"n":"Rogers","pos":"MID","xp":3.92,"pr":8.3,"own":54.6,"dc":7.7,"min":970,"g":7,"xgi":4.79,"st":"a","ch":null},{"n":"Tavernier","pos":"MID","xp":5.17,"pr":6.8,"own":33.5,"dc":8.23,"min":930,"g":6,"xgi":6.63,"st":"a","ch":null},{"n":"Thomas","pos":"DEF","xp":3.25,"pr":4,"own":6.8,"dc":11.98,"min":766,"g":0,"xgi":1.39,"st":"a","ch":100},{"n":"Verbruggen","pos":"GK","xp":4.28,"pr":4.7,"own":24.7,"dc":0,"min":990,"g":0,"xgi":0.21,"st":"a","ch":null},{"n":"Ødegaard","pos":"MID","xp":4.73,"pr":6.7,"own":16.7,"dc":4.73,"min":913,"g":4,"xgi":5.31,"st":"a","ch":null}]},"Næss":{"navn":"Jeremy Jakke","ft":1,"miss":[],"pl":[{"n":"Ajer","pos":"DEF","xp":3.39,"pr":4.5,"own":3.9,"dc":9.64,"min":990,"g":1,"xgi":0.75,"st":"a","ch":null},{"n":"Calafiori","pos":"DEF","xp":3.68,"pr":5.9,"own":48.3,"dc":4.83,"min":857,"g":3,"xgi":2.3,"st":"a","ch":100},{"n":"Davis","pos":"DEF","xp":2.28,"pr":4,"own":6.1,"dc":5.68,"min":982,"g":4,"xgi":2.36,"st":"d","ch":75},{"n":"De Cuyper","pos":"DEF","xp":5.16,"pr":5.5,"own":50.1,"dc":3.55,"min":912,"g":6,"xgi":4.35,"st":"a","ch":null},{"n":"Groß","pos":"MID","xp":6.05,"pr":6.3,"own":49.5,"dc":6.4,"min":970,"g":10,"xgi":5.69,"st":"a","ch":null},{"n":"Gvardiol","pos":"DEF","xp":3.05,"pr":5.5,"own":19.6,"dc":6.7,"min":712,"g":5,"xgi":1.79,"st":"a","ch":100},{"n":"Haaland","pos":"FWD","xp":4.68,"pr":15.8,"own":77.7,"dc":2.94,"min":979,"g":9,"xgi":9.01,"st":"a","ch":100},{"n":"Isak","pos":"FWD","xp":5.37,"pr":9.3,"own":26.9,"dc":2.38,"min":831,"g":8,"xgi":6.52,"st":"a","ch":100},{"n":"Kinsky","pos":"GK","xp":3.44,"pr":4.4,"own":16.2,"dc":0,"min":990,"g":0,"xgi":0,"st":"a","ch":null},{"n":"Manzambi","pos":"MID","xp":4.64,"pr":6.2,"own":8.7,"dc":7.27,"min":520,"g":5,"xgi":2.71,"st":"a","ch":100},{"n":"N.Jackson","pos":"FWD","xp":6.18,"pr":7.3,"own":36.4,"dc":3.06,"min":794,"g":7,"xgi":4.69,"st":"a","ch":null},{"n":"Rogers","pos":"MID","xp":3.92,"pr":8.3,"own":54.6,"dc":7.7,"min":970,"g":7,"xgi":4.79,"st":"a","ch":null},{"n":"Tavernier","pos":"MID","xp":5.17,"pr":6.8,"own":33.5,"dc":8.23,"min":930,"g":6,"xgi":6.63,"st":"a","ch":null},{"n":"Verbruggen","pos":"GK","xp":4.28,"pr":4.7,"own":24.7,"dc":0,"min":990,"g":0,"xgi":0.21,"st":"a","ch":null},{"n":"Ødegaard","pos":"MID","xp":4.73,"pr":6.7,"own":16.7,"dc":4.73,"min":913,"g":4,"xgi":5.31,"st":"a","ch":null}]},"Cedric":{"navn":"cedric's Team","ft":4,"miss":[],"pl":[{"n":"Bruno G.","pos":"MID","xp":3.09,"pr":6.7,"own":2.1,"dc":9.69,"min":455,"g":2,"xgi":1.17,"st":"a","ch":100},{"n":"Calafiori","pos":"DEF","xp":3.68,"pr":5.9,"own":48.3,"dc":4.83,"min":857,"g":3,"xgi":2.3,"st":"a","ch":100},{"n":"Davis","pos":"DEF","xp":2.28,"pr":4,"own":6.1,"dc":5.68,"min":982,"g":4,"xgi":2.36,"st":"d","ch":75},{"n":"De Cuyper","pos":"DEF","xp":5.16,"pr":5.5,"own":50.1,"dc":3.55,"min":912,"g":6,"xgi":4.35,"st":"a","ch":null},{"n":"Groß","pos":"MID","xp":6.05,"pr":6.3,"own":49.5,"dc":6.4,"min":970,"g":10,"xgi":5.69,"st":"a","ch":null},{"n":"Haaland","pos":"FWD","xp":4.68,"pr":15.8,"own":77.7,"dc":2.94,"min":979,"g":9,"xgi":9.01,"st":"a","ch":100},{"n":"João Pedro","pos":"FWD","xp":0,"pr":7.6,"own":27.7,"dc":2.94,"min":521,"g":8,"xgi":3.36,"st":"i","ch":0},{"n":"Kinsky","pos":"GK","xp":3.44,"pr":4.4,"own":16.2,"dc":0,"min":990,"g":0,"xgi":0,"st":"a","ch":null},{"n":"Konsa","pos":"DEF","xp":4.7,"pr":4.9,"own":25.4,"dc":8.0,"min":821,"g":1,"xgi":0.69,"st":"a","ch":100},{"n":"Manzambi","pos":"MID","xp":4.64,"pr":6.2,"own":8.7,"dc":7.27,"min":520,"g":5,"xgi":2.71,"st":"a","ch":100},{"n":"N.Jackson","pos":"FWD","xp":6.18,"pr":7.3,"own":36.4,"dc":3.06,"min":794,"g":7,"xgi":4.69,"st":"a","ch":null},{"n":"Palmer","pos":"MID","xp":3.85,"pr":9.8,"own":27.4,"dc":5.86,"min":968,"g":7,"xgi":3.83,"st":"a","ch":100},{"n":"Rogers","pos":"MID","xp":3.92,"pr":8.3,"own":54.6,"dc":7.7,"min":970,"g":7,"xgi":4.79,"st":"a","ch":null},{"n":"Van Hecke","pos":"DEF","xp":4.89,"pr":5.2,"own":19.3,"dc":8,"min":990,"g":2,"xgi":2.54,"st":"a","ch":100},{"n":"Verbruggen","pos":"GK","xp":4.28,"pr":4.7,"own":24.7,"dc":0,"min":990,"g":0,"xgi":0.21,"st":"a","ch":null}]},"Hakki":{"navn":"LykkeBambus","ft":4,"miss":[],"pl":[{"n":"Calafiori","pos":"DEF","xp":3.68,"pr":5.9,"own":48.3,"dc":4.83,"min":857,"g":3,"xgi":2.3,"st":"a","ch":100},{"n":"Cherki","pos":"MID","xp":3.8,"pr":7.8,"own":31.9,"dc":4.95,"min":582,"g":7,"xgi":3.84,"st":"a","ch":null},{"n":"Dalot","pos":"DEF","xp":2.75,"pr":4.7,"own":1.2,"dc":6.96,"min":802,"g":0,"xgi":0.68,"st":"a","ch":null},{"n":"De Cuyper","pos":"DEF","xp":5.16,"pr":5.5,"own":50.1,"dc":3.55,"min":912,"g":6,"xgi":4.35,"st":"a","ch":null},{"n":"Dubravka","pos":"GK","xp":0,"pr":3.9,"own":14.7,"dc":0,"min":0,"g":0,"xgi":0,"st":"a","ch":null},{"n":"Groß","pos":"MID","xp":6.05,"pr":6.3,"own":49.5,"dc":6.4,"min":970,"g":10,"xgi":5.69,"st":"a","ch":null},{"n":"Haaland","pos":"FWD","xp":4.68,"pr":15.8,"own":77.7,"dc":2.94,"min":979,"g":9,"xgi":9.01,"st":"a","ch":100},{"n":"Havertz","pos":"FWD","xp":4.4,"pr":7.4,"own":5.7,"dc":3.29,"min":821,"g":4,"xgi":3.61,"st":"a","ch":100},{"n":"João Pedro","pos":"FWD","xp":0,"pr":7.6,"own":27.7,"dc":2.94,"min":521,"g":8,"xgi":3.36,"st":"i","ch":0},{"n":"Kelleher","pos":"GK","xp":3.1,"pr":5,"own":5.8,"dc":0,"min":990,"g":0,"xgi":0.04,"st":"a","ch":null},{"n":"Rogers","pos":"MID","xp":3.92,"pr":8.3,"own":54.6,"dc":7.7,"min":970,"g":7,"xgi":4.79,"st":"a","ch":null},{"n":"Ruggeri","pos":"DEF","xp":0,"pr":4.4,"own":0.1,"dc":12.53,"min":158,"g":0,"xgi":0.05,"st":"i","ch":0},{"n":"Schade","pos":"MID","xp":4.07,"pr":6.1,"own":11.7,"dc":6.74,"min":801,"g":5,"xgi":2.89,"st":"a","ch":100},{"n":"Van Hecke","pos":"DEF","xp":4.89,"pr":5.2,"own":19.3,"dc":8,"min":990,"g":2,"xgi":2.54,"st":"a","ch":100},{"n":"Ødegaard","pos":"MID","xp":4.73,"pr":6.7,"own":16.7,"dc":4.73,"min":913,"g":4,"xgi":5.31,"st":"a","ch":null}]},"Marius":{"navn":"Post it!","ft":2,"miss":[],"pl":[{"n":"Ajer","pos":"DEF","xp":3.39,"pr":4.5,"own":3.9,"dc":9.64,"min":990,"g":1,"xgi":0.75,"st":"a","ch":null},{"n":"Belloumi","pos":"MID","xp":4.0,"pr":5.2,"own":8.9,"dc":9.06,"min":775,"g":7,"xgi":3.12,"st":"a","ch":100},{"n":"Calafiori","pos":"DEF","xp":3.68,"pr":5.9,"own":48.3,"dc":4.83,"min":857,"g":3,"xgi":2.3,"st":"a","ch":100},{"n":"De Cuyper","pos":"DEF","xp":5.16,"pr":5.5,"own":50.1,"dc":3.55,"min":912,"g":6,"xgi":4.35,"st":"a","ch":null},{"n":"Emersonn","pos":"FWD","xp":4.18,"pr":5.4,"own":2.6,"dc":3.1,"min":668,"g":3,"xgi":2.9,"st":"a","ch":100},{"n":"Haaland","pos":"FWD","xp":4.68,"pr":15.8,"own":77.7,"dc":2.94,"min":979,"g":9,"xgi":9.01,"st":"a","ch":100},{"n":"Havertz","pos":"FWD","xp":4.4,"pr":7.4,"own":5.7,"dc":3.29,"min":821,"g":4,"xgi":3.61,"st":"a","ch":100},{"n":"Hume","pos":"DEF","xp":3.46,"pr":4.2,"own":1.6,"dc":7.15,"min":730,"g":0,"xgi":0.93,"st":"a","ch":null},{"n":"Lammens","pos":"GK","xp":3.14,"pr":4.8,"own":6.9,"dc":0,"min":990,"g":0,"xgi":0.04,"st":"a","ch":null},{"n":"N.Williams","pos":"DEF","xp":4.13,"pr":4.8,"own":4.8,"dc":5.88,"min":964,"g":2,"xgi":2.19,"st":"a","ch":100},{"n":"Ndiaye","pos":"MID","xp":3.6,"pr":5.7,"own":5.1,"dc":7.79,"min":843,"g":4,"xgi":3.44,"st":"a","ch":null},{"n":"Palmer","pos":"MID","xp":3.85,"pr":9.8,"own":27.4,"dc":5.86,"min":968,"g":7,"xgi":3.83,"st":"a","ch":100},{"n":"Rogers","pos":"MID","xp":3.92,"pr":8.3,"own":54.6,"dc":7.7,"min":970,"g":7,"xgi":4.79,"st":"a","ch":null},{"n":"Verbruggen","pos":"GK","xp":4.28,"pr":4.7,"own":24.7,"dc":0,"min":990,"g":0,"xgi":0.21,"st":"a","ch":null},{"n":"Ødegaard","pos":"MID","xp":4.73,"pr":6.7,"own":16.7,"dc":4.73,"min":913,"g":4,"xgi":5.31,"st":"a","ch":null}]},"Morten":{"navn":"Sleivdal","ft":1,"miss":[],"pl":[{"n":"Alysson","pos":"MID","xp":3.45,"pr":4.9,"own":0.6,"dc":6.87,"min":419,"g":4,"xgi":0.65,"st":"a","ch":100},{"n":"Barcola","pos":"MID","xp":3.85,"pr":8.1,"own":4.4,"dc":8.03,"min":650,"g":4,"xgi":3.62,"st":"a","ch":null},{"n":"Calafiori","pos":"DEF","xp":3.68,"pr":5.9,"own":48.3,"dc":4.83,"min":857,"g":3,"xgi":2.3,"st":"a","ch":100},{"n":"Cherki","pos":"MID","xp":3.8,"pr":7.8,"own":31.9,"dc":4.95,"min":582,"g":7,"xgi":3.84,"st":"a","ch":null},{"n":"Davis","pos":"DEF","xp":2.28,"pr":4,"own":6.1,"dc":5.68,"min":982,"g":4,"xgi":2.36,"st":"d","ch":75},{"n":"De Cuyper","pos":"DEF","xp":5.16,"pr":5.5,"own":50.1,"dc":3.55,"min":912,"g":6,"xgi":4.35,"st":"a","ch":null},{"n":"Gvardiol","pos":"DEF","xp":3.05,"pr":5.5,"own":19.6,"dc":6.7,"min":712,"g":5,"xgi":1.79,"st":"a","ch":100},{"n":"Haaland","pos":"FWD","xp":4.68,"pr":15.8,"own":77.7,"dc":2.94,"min":979,"g":9,"xgi":9.01,"st":"a","ch":100},{"n":"Isak","pos":"FWD","xp":5.37,"pr":9.3,"own":26.9,"dc":2.38,"min":831,"g":8,"xgi":6.52,"st":"a","ch":100},{"n":"Kinsky","pos":"GK","xp":3.44,"pr":4.4,"own":16.2,"dc":0,"min":990,"g":0,"xgi":0,"st":"a","ch":null},{"n":"Mendy","pos":"DEF","xp":3.58,"pr":4.1,"own":4.4,"dc":12.12,"min":609,"g":1,"xgi":0.67,"st":"a","ch":100},{"n":"N.Jackson","pos":"FWD","xp":6.18,"pr":7.3,"own":36.4,"dc":3.06,"min":794,"g":7,"xgi":4.69,"st":"a","ch":null},{"n":"Petrović","pos":"GK","xp":3.06,"pr":4.5,"own":3.3,"dc":0,"min":990,"g":0,"xgi":0,"st":"a","ch":null},{"n":"Rogers","pos":"MID","xp":3.92,"pr":8.3,"own":54.6,"dc":7.7,"min":970,"g":7,"xgi":4.79,"st":"a","ch":null},{"n":"Ødegaard","pos":"MID","xp":4.73,"pr":6.7,"own":16.7,"dc":4.73,"min":913,"g":4,"xgi":5.31,"st":"a","ch":null}]}}};
+  dash.calc('neste', {
+    title: 'Neste runde',
+    description: 'Gratisbytter, forventede poeng og troppsstatistikk fra FPL Insights per lag.',
+    inputs: ['gameweeks'],
+    fn: (gameweeks) => [{ok: 1}]
+  });
+  window.fpNe = {open: []};
+  dash.draw('neste', (el) => {
+    const N = window.fpNeste, st = window.fpNe;
+    el.replaceChildren();
+    const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+    const d1 = (n, k) => n.toFixed(k == null ? 1 : k).replace('.', ',');
+    const dl = new Date(N.deadline);
+    const dtxt = new Intl.DateTimeFormat('nb-NO', {weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Oslo'}).format(dl);
+    document.getElementById('neste-h').textContent = 'Neste runde: GW' + N.gw;
+    document.getElementById('neste-sub').textContent = 'Frist ' + dtxt + '. Tall fra FPL Insights (data etter GW' + N.dataGw + ').';
+    const order = {GK: 0, DEF: 1, MID: 2, FWD: 3};
+    const teams = Object.keys(N.teams).map((t) => {
+      const T = N.teams[t];
+      const pl = T.pl.map((p) => p.xp == null ? {...p, pos: 'GK', xp: 0, pr: 4.0, own: null, dc: null, est: 1} : p);
+      const xp = pl.reduce((a, p) => a + p.xp, 0);
+      const val = pl.reduce((a, p) => a + p.pr, 0);
+      const gi = pl.reduce((a, p) => a + (p.g || 0), 0), xgi = pl.reduce((a, p) => a + (p.xgi || 0), 0);
+      const rel = xgi > 0 ? (gi - xgi) / xgi * 100 : null;
+      const out = pl.filter((p) => p.pos !== 'GK' && p.dc != null);
+      const dc = out.length ? out.reduce((a, p) => a + p.dc, 0) / out.length : null;
+      const ow = pl.filter((p) => p.own != null);
+      const own = ow.length ? ow.reduce((a, p) => a + p.own, 0) / ow.length : null;
+      return {t, navn: T.navn, ft: T.ft, pl, xp, val, rel, dc, own};
+    }).sort((a, b) => b.xp - a.xp);
+    for (const x of teams) {
+      const card = mk('div', 'fp-ne-card');
+      const head = mk('button', 'fp-ne-head'); head.type = 'button'; head.setAttribute('aria-expanded', String(st.open.includes(x.t)));
+      const nm = mk('div', 'fp-ne-name', x.t); nm.append(mk('small', '', x.navn));
+      const xp = mk('div', 'fp-ne-xp', d1(x.xp)); xp.append(mk('small', '', 'xP hele troppen'));
+      const ft = mk('div', 'fp-ne-ft');
+      const dots = mk('span', 'fp-ne-ftdots');
+      for (let i = 0; i < 5; i++) dots.append(mk('i', i < x.ft ? '' : 'off'));
+      const fb = mk('b', '', x.ft + (x.ft === 1 ? ' gratisbytte' : ' gratisbytter'));
+      ft.append(dots, fb);
+      const stats = mk('div', 'fp-ne-stats');
+      const stat = (k, v, cls) => { const e = mk('div', 'fp-ne-stat'); e.append(mk('div', 'k', k), mk('div', 'v ' + (cls || ''), v)); return e; };
+      stats.append(
+        stat('Verdi', '£' + d1(x.val) + 'm'),
+        stat('Rel. xGI', x.rel == null ? 'N/A' : (x.rel > 0 ? '+' : x.rel < 0 ? '−' : '') + Math.abs(Math.round(x.rel)) + ' %', x.rel == null ? '' : x.rel >= 0 ? 'pos' : 'neg'),
+        stat('DC snitt', x.dc == null ? 'N/A' : d1(x.dc, 2)),
+        stat('Eier %', x.own == null ? 'N/A' : d1(x.own) + ' %')
+      );
+      head.append(nm, xp, ft, stats);
+      head.addEventListener('click', () => { st.open = st.open.includes(x.t) ? st.open.filter((q) => q !== x.t) : st.open.concat(x.t); dash.draw('neste'); });
+      card.append(head);
+      if (st.open.includes(x.t)) {
+        const det = mk('div', 'fp-ne-det');
+        const tb = mk('table', 'fp-ne-tbl');
+        const th = mk('thead'); const hr = mk('tr');
+        ['Spiller', 'xP', 'Pris', 'Eier %', 'DC/90'].forEach((h) => hr.append(mk('th', '', h)));
+        th.append(hr); tb.append(th);
+        const body = mk('tbody');
+        const names = {GK: 'Keepere', DEF: 'Forsvar', MID: 'Midtbane', FWD: 'Angrep'};
+        const pls = x.pl.slice().sort((a, b) => order[a.pos] - order[b.pos] || b.xp - a.xp);
+        let last = null;
+        for (const p of pls) {
+          if (p.pos !== last) { last = p.pos; const sr = mk('tr', 'sep'); const sc = mk('td', '', names[p.pos]); sc.colSpan = 5; sr.append(sc); body.append(sr); }
+          const tr = mk('tr');
+          const c0 = mk('td', '', p.n);
+          if (p.est) c0.append(mk('small', '', 'ikke i FPL Insights, antatt'));
+          else if (p.st && p.st !== 'a') c0.append(mk('span', 'fp-ne-warn', p.ch != null ? p.ch + ' %' : '⚠'));
+          tr.append(c0, mk('td', '', d1(p.xp)), mk('td', '', '£' + d1(p.pr)), mk('td', '', p.own == null ? '–' : d1(p.own)), mk('td', '', p.dc == null || p.pos === 'GK' ? '–' : d1(p.dc, 2)));
+          body.append(tr);
+        }
+        tb.append(body); det.append(tb);
+        card.append(det);
+      }
+      el.append(card);
+    }
+    el.append(mk('p', 'fp-note', 'Trykk på et lag for å se spillerne. Gratisbytter er regnet ut fra byttehistorikken (maks 5) og kan avvike fra FPL om en hit eller chip er registrert annerledes. xP er FPL Insights sin modell for hele troppen på 15, ikke bare startelleveren. Verdi er sum av dagens pris for alle 15, uten bank. Rel. xGI er (mål + assist − xGI) / xGI for troppens spillere denne sesongen. DC snitt er snittet av defensive contribution per 90 for utespillerne. Eier % er snittet av eierandelen i hele FPL.'));
+  });
+</script>
+
+<script>
+  const fpTabs = ['oppsummering', 'oversikt', 'chips', 'runder', 'payout', 'neste', 'redaksjonen'];
   window.fpShow = (id, link) => {
     if (!fpTabs.includes(id)) return;
     document.querySelectorAll('.fp-panel').forEach((p) => { p.hidden = p.id !== id; });
