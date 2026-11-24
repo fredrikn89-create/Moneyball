@@ -313,6 +313,8 @@
   .fp-ne-tbl td small { color: #7a6a4d; margin-left: 4px; }
   .fp-ne-tbl tr.sep td { border-top: 0; font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #8c6a32; text-align: left; padding-top: 7px; }
   .fp-ne-warn { color: #a3342b; font-weight: 700; margin-left: 4px; }
+  .fp-ne-sort { display: flex; flex-direction: column; gap: 4px; }
+  .fp-ne-sortl { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-fg-muted); font-weight: 700; }
   .fp-ne-info { font-size: 12px; color: var(--color-fg-muted); }
   .fp-ne-info summary { cursor: pointer; font-weight: 600; }
   .fp-ne-info p { margin: 6px 0 0; }
@@ -1501,7 +1503,7 @@
     inputs: ['gameweeks'],
     fn: (gameweeks) => [{ok: 1}]
   });
-  window.fpNe = {open: []};
+  window.fpNe = {open: [], sort: 'xp', dir: -1};
   dash.draw('neste', (el) => {
     const N = window.fpNeste, st = window.fpNe;
     el.replaceChildren();
@@ -1525,7 +1527,27 @@
       const ow = pl.filter((p) => p.own != null);
       const own = ow.length ? ow.reduce((a, p) => a + p.own, 0) / ow.length : null;
       return {t, navn: T.navn, ft: T.ft, pl, xp, val, rel, dc, own};
-    }).sort((a, b) => b.xp - a.xp);
+    });
+    const keys = [['xp', 'xP'], ['ft', 'Gratisbytter'], ['val', 'Verdi'], ['rel', 'xGI rel.'], ['dc', 'DC/90'], ['own', 'Eier']];
+    const key = st.sort, dir = st.dir;
+    teams.sort((a, b) => {
+      const va = a[key], vb = b[key];
+      if (va == null && vb == null) return 0;
+      if (va == null) return 1;
+      if (vb == null) return -1;
+      return (va - vb) * dir || b.xp - a.xp;
+    });
+    const bar = mk('div', 'fp-ne-sort');
+    bar.append(mk('span', 'fp-ne-sortl', 'Sorter på'));
+    const seg = mk('div', 'fp-seg'); seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', 'Sorter lagene');
+    for (const [k, l] of keys) {
+      const b = mk('button', 'fp-segbtn', l + (k === key ? (dir < 0 ? ' ↓' : ' ↑') : '')); b.type = 'button';
+      b.setAttribute('aria-pressed', String(k === key));
+      b.addEventListener('click', () => { if (st.sort === k) st.dir = -st.dir; else { st.sort = k; st.dir = -1; } dash.draw('neste'); });
+      seg.append(b);
+    }
+    bar.append(seg);
+    el.append(bar);
     for (const x of teams) {
       const card = mk('div', 'fp-ne-card');
       const head = mk('button', 'fp-ne-head'); head.type = 'button'; head.setAttribute('aria-expanded', String(st.open.includes(x.t)));
