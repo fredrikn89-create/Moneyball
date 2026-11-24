@@ -29,6 +29,11 @@ def main(out):
     b = get("bootstrap-static/")
     finished = [e["id"] for e in b["events"] if e.get("finished")]
     cur = max(finished) if finished else 0
+    # Ta med pågående runde (poeng kan være foreløpige til runden er ferdig)
+    live = [e["id"] for e in b["events"] if e.get("is_current") and e["id"] > cur]
+    provisional = bool(live)
+    if provisional:
+        cur = live[0]
     teams = {t["id"]: t["short_name"] for t in b["teams"]}
     pos = {1: "GK", 2: "DEF", 3: "MID", 4: "FWD"}
     players = {}
@@ -43,7 +48,7 @@ def main(out):
             if 1 <= r <= cur:
                 pts[r - 1] = (pts[r - 1] or 0) + m["total_points"]
         players[str(e["id"])] = [e["web_name"], teams[e["team"]], pos[e["element_type"]], pts]
-    data = {"updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"), "gw": cur, "players": players}
+    data = {"updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"), "gw": cur, "provisional": provisional, "players": players}
     with open(out, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
     print(f"Skrev {len(players)} spillere, runde 1-{cur}")
